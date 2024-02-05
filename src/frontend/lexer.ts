@@ -6,6 +6,7 @@ export enum TokenType {
     CloseBracket,
 
     Comma,
+    SemiColon,
 
     EOF,
 }
@@ -14,6 +15,7 @@ const symbolToken = {
     "[": TokenType.OpenBracket,
     "]": TokenType.CloseBracket,
     ",": TokenType.Comma,
+    ";": TokenType.SemiColon,
 } as const
 
 export class Token {
