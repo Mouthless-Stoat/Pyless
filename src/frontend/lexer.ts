@@ -8,6 +8,8 @@ export enum TokenType {
     Comma,
     SemiColon,
 
+    Function,
+
     EOF,
 }
 
@@ -16,6 +18,10 @@ const symbolToken = {
     "]": TokenType.CloseBracket,
     ",": TokenType.Comma,
     ";": TokenType.SemiColon,
+} as const
+
+const keywordToken = {
+    fn: TokenType.Function,
 } as const
 
 export class Token {
@@ -55,7 +61,14 @@ export function tokenize(input = "") {
             // no group match skip
             if (!token) throw `What is this token type`
             if (token.mul) {
-                tokens.push(new Token(TokenType.Symbol, col ?? -1, row, token.mul))
+                tokens.push(
+                    new Token(
+                        keywordToken[token.mul as keyof typeof keywordToken] ?? TokenType.Symbol,
+                        col ?? -1,
+                        row,
+                        token.mul
+                    )
+                )
             } else if (token.sym) {
                 tokens.push(
                     new Token(
