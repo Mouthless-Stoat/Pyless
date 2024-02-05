@@ -26,14 +26,14 @@ const keywordToken = {
 
 export class Token {
     type: TokenType
-    col: number
     row: number
+    col: number
     val: string
 
-    constructor(type: TokenType, col: number, row: number, val: string) {
+    constructor(type: TokenType, row: number, col: number, val: string) {
         this.type = type
-        this.col = col
         this.row = row
+        this.col = col
         this.val = val
     }
 
@@ -64,8 +64,8 @@ export function tokenize(input = "") {
                 tokens.push(
                     new Token(
                         keywordToken[token.mul as keyof typeof keywordToken] ?? TokenType.Symbol,
-                        col ?? -1,
                         row,
+                        col ?? -1,
                         token.mul
                     )
                 )
@@ -73,13 +73,13 @@ export function tokenize(input = "") {
                 tokens.push(
                     new Token(
                         symbolToken[token.sym as keyof typeof symbolToken] ?? TokenType.Symbol,
-                        col ?? -1,
                         row,
+                        col ?? -1,
                         token.sym
                     )
                 )
             } else if (token.num) {
-                tokens.push(new Token(TokenType.Number, col ?? -1, row, token.num))
+                tokens.push(new Token(TokenType.Number, row, col ?? -1, token.num))
             }
         }
     }
