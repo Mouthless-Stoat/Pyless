@@ -30,8 +30,11 @@ export default class Parser {
 
         while (this.tokens.length > 0) {
             body.push(this.parseStmt())
-            if (this.current().isTypes(TokenType.EOL)) {
-                this.next()
+            const token = this.next()
+            if (!token.isTypes(TokenType.EOL)) {
+                throw `SyntaxError: Unexpected Token \`${token.val}\` at line ${token.row + 1} and column ${
+                    token.col + 1
+                }`
             }
         }
 
@@ -75,7 +78,9 @@ export default class Parser {
             default:
                 const token = this.current()
                 if (token.isTypes(TokenType.EOL)) throw `SyntaxError: Unexpected End of Line on line ${token.row + 1}`
-                throw `SyntaxError: Unexpected Token ${token.val} at line ${token.row + 1} and column ${token.col + 1}`
+                throw `SyntaxError: Unexpected Token \`${token.val}\` at line ${token.row + 1} and column ${
+                    token.col + 1
+                }`
         }
     }
 }

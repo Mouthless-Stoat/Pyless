@@ -16,12 +16,18 @@ describe("Error", () => {
     })
 
     test("Unexpected Token", () => {
-        expect(() => parser.genAST("+")).toThrow(new Error("SyntaxError: Unexpected Token + at line 1 and column 1"))
+        expect(() => parser.genAST("+")).toThrow(new Error("SyntaxError: Unexpected Token `+` at line 1 and column 1"))
+    })
+
+    test("Unexpected Token 2", () => {
+        expect(() => parser.genAST("1 2")).toThrow(
+            new Error("SyntaxError: Unexpected Token `2` at line 1 and column 3")
+        )
     })
 
     test("Multiline Unexpected Token", () => {
         expect(() => parser.genAST("1+1\n+1")).toThrow(
-            new Error("SyntaxError: Unexpected Token + at line 2 and column 1")
+            new Error("SyntaxError: Unexpected Token `+` at line 2 and column 1")
         )
     })
 })
