@@ -1,4 +1,4 @@
-import { Program, type Expr, type Stmt, BinaryExpr, type BinaryType, NumberLiteral, Identifier } from "./ast"
+import { Block, type Expr, type Stmt, BinaryExpr, type BinaryType, NumberLiteral, Identifier } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
 const Multiplicative = [TokenType.Star, TokenType.Slash] as const
@@ -23,7 +23,7 @@ export default class Parser {
         return tk
     }
 
-    genAST(source: string): Program {
+    genAST(source: string): Block {
         const body: Stmt[] = []
 
         this.tokens = tokenize(source)
@@ -35,7 +35,7 @@ export default class Parser {
             }
         }
 
-        return new Program(body)
+        return new Block(body)
     }
 
     private parseStmt(): Stmt {

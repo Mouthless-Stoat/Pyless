@@ -1,6 +1,7 @@
-enum NodeType {
+export enum NodeType {
+    Block,
+
     // stmt
-    Program,
     Assignment,
 
     // expr
@@ -18,8 +19,8 @@ export interface Stmt {
 export interface Expr extends Stmt {}
 
 // stmt class
-export class Program implements Stmt {
-    type = NodeType.NumberLiteral
+export class Block implements Stmt {
+    type = NodeType.Block
     body: Stmt[]
 
     constructor(body: Stmt[]) {
