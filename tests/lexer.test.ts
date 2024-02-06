@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test"
+import { test, expect, describe } from "bun:test"
 import { Token, TokenType, tokenize } from "../src/front/lexer"
 
 function addEOL(lines: Token[], line = 0): Token[] {
@@ -58,4 +58,61 @@ test("Keyword", () => {
     expect(tokenize("fn hello")).toEqual(
         addEOL([new Token(TokenType.Function, 0, 0, "fn"), new Token(TokenType.Symbol, 0, 3, "hello")])
     )
+})
+
+describe("Number", () => {
+    test("Negative Number", () => {
+        expect(tokenize("-1")).toEqual(
+            addEOL([new Token(TokenType.Minus, 0, 0, "-"), new Token(TokenType.Number, 0, 1, "1")])
+        )
+    })
+
+    test("Negative Number 2", () => {
+        expect(tokenize("-1-2")).toEqual(
+            addEOL([
+                new Token(TokenType.Minus, 0, 0, "-"),
+                new Token(TokenType.Number, 0, 1, "1"),
+                new Token(TokenType.Minus, 0, 2, "-"),
+                new Token(TokenType.Number, 0, 3, "2"),
+            ])
+        )
+    })
+
+    test("Floating-point", () => {
+        expect(tokenize("10.13")).toEqual(addEOL([new Token(TokenType.Number, 0, 0, "10.13")]))
+    })
+
+    test("Floating-point 2", () => {
+        expect(tokenize("10.11 12.1934")).toEqual(
+            addEOL([new Token(TokenType.Number, 0, 0, "10.11"), new Token(TokenType.Number, 0, 6, "12.1934")])
+        )
+    })
+
+    test("Floating-point 3", () => {
+        expect(tokenize("10.11.12.1934")).toEqual(
+            addEOL([
+                new Token(TokenType.Number, 0, 0, "10.11"),
+                new Token(TokenType.Dot, 0, 5, "."),
+                new Token(TokenType.Number, 0, 6, "12.1934"),
+            ])
+        )
+    })
+
+    test("Scientific Notation", () => {
+        expect(tokenize("1e10")).toEqual(addEOL([new Token(TokenType.Number, 0, 0, "1e10")]))
+    })
+
+    test("Scientific Notation 2", () => {
+        expect(tokenize("4e-10")).toEqual(addEOL([new Token(TokenType.Number, 0, 0, "4e-10")]))
+    })
+
+    test("Scientific Notation 3", () => {
+        expect(tokenize("4e1.4")).toEqual(
+            addEOL([
+                new Token(TokenType.Number, 0, 0, "4e1"),
+                new Token(TokenType.Dot, 0, 3, "."),
+                new Token(TokenType.Number, 0, 4, "4"),
+            ])
+        )
+    })
 })
