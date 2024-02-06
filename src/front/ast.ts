@@ -12,11 +12,17 @@ export enum NodeType {
     NumberLiteral,
 }
 
+export function isNodeType(node: Stmt, ...types: NodeType[]) {
+    return types.some((t) => node.type === t)
+}
+
 export interface Stmt {
     type: NodeType
 }
 
-export interface Expr extends Stmt {}
+export interface Expr extends Stmt {
+    paren: boolean
+}
 
 // stmt class
 export class Block implements Stmt {
@@ -32,9 +38,11 @@ export class Block implements Stmt {
 export class Identifier implements Expr {
     type = NodeType.Identifier
     symbol: string
+    paren: boolean
 
-    constructor(sym: string) {
+    constructor(sym: string, paren?: boolean) {
         this.symbol = sym
+        this.paren = paren ?? false
     }
 }
 
@@ -42,9 +50,11 @@ export class Identifier implements Expr {
 export class NumberLiteral implements Expr {
     type = NodeType.NumberLiteral
     number: string
+    paren: boolean
 
-    constructor(num: string) {
+    constructor(num: string, paren?: boolean) {
         this.number = num
+        this.paren = paren ?? false
     }
 }
 
@@ -52,10 +62,12 @@ export class AssignmentExpr implements Expr {
     type = NodeType.Assignment
     symbol: Expr
     value: Expr
+    paren: boolean
 
-    constructor(sym: Expr, val: Expr) {
+    constructor(sym: Expr, val: Expr, paren?: boolean) {
         this.symbol = sym
         this.value = val
+        this.paren = paren ?? false
     }
 }
 
@@ -66,10 +78,12 @@ export class BinaryExpr implements Expr {
     left: Expr
     right: Expr
     operator: BinaryType
+    paren: boolean
 
-    constructor(left: Expr, right: Expr, op: BinaryType) {
+    constructor(left: Expr, right: Expr, op: BinaryType, paren?: boolean) {
         this.left = left
         this.right = right
         this.operator = op
+        this.paren = paren ?? false
     }
 }

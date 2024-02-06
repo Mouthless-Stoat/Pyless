@@ -1,36 +1,55 @@
-import { NodeType, type Block, type Stmt, AssignmentExpr, NumberLiteral, Identifier, BinaryExpr } from "../front/ast"
+import {
+    NodeType,
+    type Block,
+    type Stmt,
+    AssignmentExpr,
+    NumberLiteral,
+    Identifier,
+    BinaryExpr,
+    type Expr,
+} from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
 
 export function trans(astNode: Stmt, indent: number, top: boolean = false): string {
+    let out
     switch (astNode.type) {
         case NodeType.Block:
-            return transBlock(astNode as Block, indent)
+            out = transBlock(astNode as Block, indent)
+            break
         case NodeType.Identifier:
-            return (astNode as Identifier).symbol
+            out = (astNode as Identifier).symbol
+            break
         case NodeType.NumberLiteral:
-            return (astNode as NumberLiteral).number
+            out = (astNode as NumberLiteral).number
+            break
         case NodeType.Assignment:
-            return transAssignment(astNode as AssignmentExpr, indent, top)
+            out = transAssignment(astNode as AssignmentExpr, indent, top)
+            break
         case NodeType.BinaryExpr:
-            return transBinaryExpr(astNode as BinaryExpr, indent)
-
+            out = transBinaryExpr(astNode as BinaryExpr, indent)
+            break
         default:
             throw `This AST node have not been implemented ${NodeType[astNode.type]}`
     }
+
+    return (astNode as Expr).paren ? `(${out})` : `${out}`
 }
 
 function transBlock(block: Block, indent: number): string {
     let out = ""
     for (const stmt of block.body) {
-        out += trans(stmt, indent + 1, true)
+        out += "    ".repeat(indent + 1) + trans(stmt, indent + 1, true)
     }
     return out
 }
 
 function transAssignment(assignment: AssignmentExpr, indent: number, top: boolean): string {
+    assignment.paren = false
     const sym = trans(assignment.symbol, indent, top)
     let val
+
+    // support chaining assignment without making them funny
     if (assignment.value.type === NodeType.Assignment && top) {
         val = trans(assignment.value, indent, top)
     } else val = trans(assignment.value, indent)

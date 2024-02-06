@@ -121,6 +121,18 @@ describe("Order of Operation", () => {
             ])
         )
     })
+
+    test("Parentheses", () => {
+        expect(parser.genAST("(1 + 1) * 3")).toEqual(
+            new Block([
+                new BinaryExpr(
+                    new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+", true),
+                    new NumberLiteral("3"),
+                    "*"
+                ),
+            ])
+        )
+    })
 })
 
 describe("Assignment", () => {

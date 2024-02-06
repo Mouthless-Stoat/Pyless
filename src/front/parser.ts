@@ -24,10 +24,10 @@ export default class Parser {
         return this.tokens.shift() as Token
     }
 
-    private expect(type: TokenType, err: string): Token {
+    private expect(type: TokenType, err: string, detail: boolean = false): Token {
         const tk = this.next()
         if (!tk || !tk.isTypes(type)) {
-            throw err
+            throw err + detail ? ` at line ${tk.row} and column ${tk.col}` : ""
         }
         return tk
     }
@@ -98,6 +98,12 @@ export default class Parser {
                 return new NumberLiteral(this.next().val)
             case TokenType.Symbol:
                 return new Identifier(this.next().val)
+            case TokenType.OpenParen:
+                this.next()
+                const expr = this.parseExpr()
+                expr.paren = true
+                this.expect(TokenType.CloseParen, "SyntaxError: Expected `)`", true)
+                return expr
             default:
                 const token = this.current()
                 if (token.isTypes(TokenType.EOL)) throw `SyntaxError: Unexpected End of Line on line ${token.row + 1}`

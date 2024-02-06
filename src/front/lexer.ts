@@ -2,6 +2,8 @@ export enum TokenType {
     Number,
     Symbol,
 
+    OpenParen,
+    CloseParen,
     OpenBracket,
     CloseBracket,
 
@@ -22,6 +24,8 @@ export enum TokenType {
 const symbolToken = {
     "[": TokenType.OpenBracket,
     "]": TokenType.CloseBracket,
+    "(": TokenType.OpenParen,
+    ")": TokenType.CloseParen,
     ",": TokenType.Comma,
     ".": TokenType.Dot,
     "+": TokenType.Plus,
