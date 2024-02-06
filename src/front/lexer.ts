@@ -56,23 +56,22 @@ export class Token {
     }
 }
 
-export function tokenize(input = ""): Token[][] {
+export function tokenize(input = ""): Token[] {
     const srcLines = input.replace("\r\n", "\n").split("\n") // window shit
-    const tokens: Token[][] = []
+    const tokens: Token[] = []
 
     // behold regex hell
     // if it only letter then it's a multi symbol (mul)
     // if it onlt number then it's a number (num)
     // else it's a symbol (sym)
     for (const [row, line] of srcLines.entries()) {
-        const temp = []
         for (const { groups: token, index: col } of line.matchAll(
             /(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e\d+(?:\.\d+)?)?)|(?<sym>[^\s])/g
         )) {
-            // no group match skip
             if (!token) throw `What is this token type`
+
             if (token.mul) {
-                temp.push(
+                tokens.push(
                     new Token(
                         keywordToken[token.mul as keyof typeof keywordToken] ?? TokenType.Symbol,
                         row,
@@ -81,7 +80,7 @@ export function tokenize(input = ""): Token[][] {
                     )
                 )
             } else if (token.sym) {
-                temp.push(
+                tokens.push(
                     new Token(
                         symbolToken[token.sym as keyof typeof symbolToken] ?? TokenType.Symbol,
                         row,
@@ -90,10 +89,11 @@ export function tokenize(input = ""): Token[][] {
                     )
                 )
             } else if (token.num) {
-                temp.push(new Token(TokenType.Number, row, col ?? -1, token.num))
+                tokens.push(new Token(TokenType.Number, row, col ?? -1, token.num))
             }
         }
-        tokens.push([...temp, new Token(TokenType.EOL, row, -1, "EOL")])
+
+        tokens.push(new Token(TokenType.EOL, row, -1, "EOL"))
     }
 
     return tokens

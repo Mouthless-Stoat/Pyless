@@ -1,5 +1,3 @@
-import { TokenType } from "./lexer"
-
 enum NodeType {
     // stmt
     Program,

@@ -5,15 +5,14 @@ const Multiplicative = [TokenType.Star, TokenType.Slash] as const
 const Additive = [TokenType.Plus, TokenType.Minus] as const
 
 export default class Parser {
-    lines: Token[][] = []
-    currentLine: Token[] = []
+    tokens: Token[] = []
 
     private current(): Token {
-        return this.currentLine[0]
+        return this.tokens[0]
     }
 
     private next(): Token {
-        return this.currentLine.shift() as Token
+        return this.tokens.shift() as Token
     }
 
     private expect(type: TokenType, err: string): Token {
@@ -26,13 +25,13 @@ export default class Parser {
 
     genAST(source: string): Program {
         const body: Stmt[] = []
-        this.lines = tokenize(source)
 
-        for (const [i, line] of this.lines.entries()) {
-            this.currentLine = line
-            while (this.currentLine.length > 0) {
-                body.push(this.parseStmt())
-                this.expect(TokenType.EOL, `SyntaxError: Expected End of Line on line ${i + 1}`)
+        this.tokens = tokenize(source)
+
+        while (this.tokens.length > 0) {
+            body.push(this.parseStmt())
+            if (this.current().isTypes(TokenType.EOL)) {
+                this.next()
             }
         }
 

@@ -1,6 +1,6 @@
 import { test, expect, describe } from "bun:test"
-import Parser from "../src/frontend/parser"
-import { BinaryExpr, NumberLiteral, Program } from "../src/frontend/ast"
+import Parser from "../src/front/parser"
+import { BinaryExpr, NumberLiteral, Program } from "../src/front/ast"
 
 const parser = new Parser()
 
@@ -12,15 +12,17 @@ test("Basic", () => {
 
 describe("Error", () => {
     test("Unexpected EOF", () => {
-        expect(() => parser.genAST("1+")).toThrow("SyntaxError: Unexpected End of Line on line 1")
+        expect(() => parser.genAST("1+")).toThrow(new Error("SyntaxError: Unexpected End of Line on line 1"))
     })
 
     test("Unexpected Token", () => {
-        expect(() => parser.genAST("+")).toThrow("SyntaxError: Unexpected Token + at line 1 and column 1")
+        expect(() => parser.genAST("+")).toThrow(new Error("SyntaxError: Unexpected Token + at line 1 and column 1"))
     })
 
     test("Multiline Unexpected Token", () => {
-        expect(() => parser.genAST("1+1\n+1")).toThrow("SyntaxError: Unexpected Token + at line 2 and column 1")
+        expect(() => parser.genAST("1+1\n+1")).toThrow(
+            new Error("SyntaxError: Unexpected Token + at line 2 and column 1")
+        )
     })
 })
 describe("Chaining", () => {
