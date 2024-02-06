@@ -10,3 +10,21 @@ function transpile(source: string) {
 test("Basic", () => {
     expect(transpile("1 + 1")).toBe("1 + 1")
 })
+
+describe("Assignment", () => {
+    test("Basic", () => {
+        expect(transpile("a = 1")).toBe("a = 1")
+    })
+
+    test("Chain", () => {
+        expect(transpile("a = b = 1")).toBe("a = b = 1")
+    })
+
+    test("Mixed", () => {
+        expect(transpile("a = 1 + 1")).toBe("a = 1 + 1")
+    })
+
+    test("Mixed Chain", () => {
+        expect(transpile("a = b = 1 + 1")).toBe("a = b = 1 + 1")
+    })
+})

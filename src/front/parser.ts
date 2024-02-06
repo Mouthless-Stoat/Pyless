@@ -1,4 +1,13 @@
-import { Block, type Expr, type Stmt, BinaryExpr, type BinaryType, NumberLiteral, Identifier } from "./ast"
+import {
+    Block,
+    type Expr,
+    type Stmt,
+    BinaryExpr,
+    type BinaryType,
+    NumberLiteral,
+    Identifier,
+    AssignmentExpr,
+} from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
 const Multiplicative = [TokenType.Star, TokenType.Slash] as const
@@ -21,6 +30,10 @@ export default class Parser {
             throw err
         }
         return tk
+    }
+
+    private isTypes(...types: TokenType[]): boolean {
+        return this.current().isTypes(...types)
     }
 
     genAST(source: string): Block {
@@ -46,7 +59,17 @@ export default class Parser {
     }
 
     private parseExpr(): Expr {
-        return this.parseAdditiveExpr()
+        return this.parseAssignmentExpr()
+    }
+
+    private parseAssignmentExpr(): Expr {
+        let sym = this.parseAdditiveExpr()
+        if (this.isTypes(TokenType.Equal)) {
+            this.next()
+            const val = this.parseExpr()
+            return new AssignmentExpr(sym, val)
+        }
+        return sym
     }
 
     private parseAdditiveExpr(): Expr {

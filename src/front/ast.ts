@@ -48,12 +48,12 @@ export class NumberLiteral implements Expr {
     }
 }
 
-export class Assignment implements Expr {
+export class AssignmentExpr implements Expr {
     type = NodeType.Assignment
-    symbol: string
-    value: Expr | Assignment
+    symbol: Expr
+    value: Expr
 
-    constructor(sym: string, val: Expr | Assignment) {
+    constructor(sym: Expr, val: Expr) {
         this.symbol = sym
         this.value = val
     }

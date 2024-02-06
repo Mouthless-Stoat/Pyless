@@ -12,6 +12,7 @@ export enum TokenType {
     Star,
     Slash,
     Percent,
+    Equal,
 
     Function,
 
@@ -28,6 +29,7 @@ const symbolToken = {
     "*": TokenType.Star,
     "/": TokenType.Slash,
     "%": TokenType.Percent,
+    "=": TokenType.Equal,
     "\n": TokenType.EOL,
     ";": TokenType.EOL,
 } as const
