@@ -35,17 +35,6 @@ test("List", () => {
     )
 })
 
-test("Long Numbers", () => {
-    expect(tokenize("11 2 333 4")).toEqual(
-        addEOL([
-            new Token(TokenType.Number, 0, 0, "11"),
-            new Token(TokenType.Number, 0, 3, "2"),
-            new Token(TokenType.Number, 0, 5, "333"),
-            new Token(TokenType.Number, 0, 9, "4"),
-        ])
-    )
-})
-
 test("Multi-line", () => {
     expect(tokenize("hello\n12")).toEqual(
         addEOL([new Token(TokenType.Symbol, 0, 0, "hello")]).concat(
@@ -114,5 +103,30 @@ describe("Number", () => {
                 new Token(TokenType.Number, 0, 4, "4"),
             ])
         )
+    })
+
+    test("Multiple Numbers", () => {
+        expect(tokenize("11 2 333 4")).toEqual(
+            addEOL([
+                new Token(TokenType.Number, 0, 0, "11"),
+                new Token(TokenType.Number, 0, 3, "2"),
+                new Token(TokenType.Number, 0, 5, "333"),
+                new Token(TokenType.Number, 0, 9, "4"),
+            ])
+        )
+    })
+})
+
+describe("String", () => {
+    test("Basic", () => {
+        expect(tokenize('"Hello World"')).toEqual(addEOL([new Token(TokenType.String, 0, 0, '"Hello World"')]))
+    })
+
+    test("Escape", () => {
+        expect(tokenize('"\\t\\r\\n"')).toEqual(addEOL([new Token(TokenType.String, 0, 0, '"\\t\\r\\n"')]))
+    })
+
+    test("Special", () => {
+        expect(tokenize('"\t"')).toEqual(addEOL([new Token(TokenType.String, 0, 0, '"\t"')]))
     })
 })

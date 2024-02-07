@@ -1,11 +1,14 @@
 export enum TokenType {
     Number,
+    String,
     Symbol,
 
     OpenParen,
     CloseParen,
     OpenBracket,
     CloseBracket,
+    OpenBrace,
+    CloseBrace,
 
     Comma,
     Dot,
@@ -26,6 +29,8 @@ const symbolToken = {
     "]": TokenType.CloseBracket,
     "(": TokenType.OpenParen,
     ")": TokenType.CloseParen,
+    "{": TokenType.OpenBrace,
+    "}": TokenType.CloseBrace,
     ",": TokenType.Comma,
     ".": TokenType.Dot,
     "+": TokenType.Plus,
@@ -74,7 +79,7 @@ export function tokenize(input = ""): Token[] {
     // else it's a symbol (sym)
     for (const [row, line] of srcLines.entries()) {
         for (const { groups: token, index: col } of line.matchAll(
-            /(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e-?\d+)?)|(?<sym>[^\s])/g
+            /(?<string>"(?:\\.|[^"\\])*")|(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e-?\d+)?)|(?<sym>[^\s])/g
         )) {
             if (!token) throw `What is this token type`
 
@@ -98,6 +103,8 @@ export function tokenize(input = ""): Token[] {
                 )
             } else if (token.num) {
                 tokens.push(new Token(TokenType.Number, row, col ?? -1, token.num))
+            } else if (token.string) {
+                tokens.push(new Token(TokenType.String, row, col ?? -1, token.string))
             }
         }
 

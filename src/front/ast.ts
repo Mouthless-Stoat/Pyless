@@ -10,6 +10,7 @@ export enum NodeType {
 
     // literal
     NumberLiteral,
+    StringLiteral,
 }
 
 export function isNodeType(node: Stmt, ...types: NodeType[]) {
@@ -34,18 +35,6 @@ export class Block implements Stmt {
     }
 }
 
-// expr class
-export class Identifier implements Expr {
-    type = NodeType.Identifier
-    symbol: string
-    paren: boolean
-
-    constructor(sym: string, paren?: boolean) {
-        this.symbol = sym
-        this.paren = paren ?? false
-    }
-}
-
 // literal class
 export class NumberLiteral implements Expr {
     type = NodeType.NumberLiteral
@@ -54,6 +43,29 @@ export class NumberLiteral implements Expr {
 
     constructor(num: string, paren?: boolean) {
         this.number = num
+        this.paren = paren ?? false
+    }
+}
+
+export class StringLiteral implements Expr {
+    type = NodeType.StringLiteral
+    content: string
+    paren: boolean
+
+    constructor(content: string, paren?: boolean) {
+        this.content = content
+        this.paren = paren ?? false
+    }
+}
+
+// expr class
+export class Identifier implements Expr {
+    type = NodeType.Identifier
+    symbol: string
+    paren: boolean
+
+    constructor(sym: string, paren?: boolean) {
+        this.symbol = sym
         this.paren = paren ?? false
     }
 }

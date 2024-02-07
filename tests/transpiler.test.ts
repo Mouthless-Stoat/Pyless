@@ -25,7 +25,7 @@ describe("Binary Operation", () => {
     })
 
     test("Parentheses 3", () => {
-        expect(transpile("1 * ((2 + 3)/ 4)")).toBe("1 * ((2 + 3) / 4)")
+        expect(transpile("1 *((2 +3)/ 4)")).toBe("1 * ((2 + 3) / 4)")
     })
 })
 

@@ -7,6 +7,7 @@ import {
     NumberLiteral,
     Identifier,
     AssignmentExpr,
+    StringLiteral,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -96,6 +97,8 @@ export default class Parser {
         switch (this.current().type) {
             case TokenType.Number:
                 return new NumberLiteral(this.next().val)
+            case TokenType.String:
+                return new StringLiteral(this.next().val)
             case TokenType.Symbol:
                 return new Identifier(this.next().val)
             case TokenType.OpenParen:

@@ -7,6 +7,7 @@ import {
     Identifier,
     BinaryExpr,
     type Expr,
+    StringLiteral,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -15,17 +16,15 @@ export function trans(astNode: Stmt, indent: number, top: boolean = false): stri
     let out
     switch (astNode.type) {
         case NodeType.Block:
-            out = transBlock(astNode as Block, indent)
-            break
+            return transBlock(astNode as Block, indent)
         case NodeType.Identifier:
-            out = (astNode as Identifier).symbol
-            break
+            return (astNode as Identifier).symbol
         case NodeType.NumberLiteral:
-            out = (astNode as NumberLiteral).number
-            break
+            return (astNode as NumberLiteral).number
+        case NodeType.StringLiteral:
+            return (astNode as StringLiteral).content
         case NodeType.Assignment:
-            out = transAssignment(astNode as AssignmentExpr, indent, top)
-            break
+            return transAssignment(astNode as AssignmentExpr, indent, top)
         case NodeType.BinaryExpr:
             out = transBinaryExpr(astNode as BinaryExpr, indent)
             break
@@ -45,7 +44,6 @@ function transBlock(block: Block, indent: number): string {
 }
 
 function transAssignment(assignment: AssignmentExpr, indent: number, top: boolean): string {
-    assignment.paren = false
     const sym = trans(assignment.symbol, indent, top)
     let val
 

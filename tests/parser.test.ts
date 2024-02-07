@@ -1,6 +1,6 @@
 import { test, expect, describe } from "bun:test"
 import Parser from "../src/front/parser"
-import { BinaryExpr, NumberLiteral, Block, AssignmentExpr, Identifier } from "../src/front/ast"
+import { BinaryExpr, NumberLiteral, Block, AssignmentExpr, Identifier, StringLiteral } from "../src/front/ast"
 
 const parser = new Parser()
 
@@ -8,6 +8,10 @@ test("Basic", () => {
     expect(parser.genAST("1 + 1")).toEqual(
         new Block([new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+")])
     )
+})
+
+test("String", () => {
+    expect(parser.genAST('"Hello World"')).toEqual(new Block([new StringLiteral('"Hello World"')]))
 })
 
 describe("Error", () => {
@@ -31,6 +35,7 @@ describe("Error", () => {
         )
     })
 })
+
 describe("Chaining", () => {
     test("Basic", () => {
         expect(parser.genAST("1 + 2 + 3")).toEqual(
