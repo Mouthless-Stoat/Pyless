@@ -51,6 +51,9 @@ export default class Parser {
     }
 
     private parseBlock(): Block {
+        // short hand for block with single statement
+        if (!this.isTypes(TokenType.OpenBrace)) return new Block([this.parseStmt()])
+
         this.expect(TokenType.OpenBrace, "SyntaxError: Expected `{`")
         const body: Stmt[] = []
         while (!this.isTypes(TokenType.CloseBrace)) {
@@ -87,14 +90,19 @@ export default class Parser {
         const cond = this.parseExpr()
         this.expect(TokenType.CloseParen, "SyntaxError: Expected `)`")
         const body = this.parseBlock()
-        return new IfStmt(cond, body)
+
+        let elseBlock
+        if (this.isTypes(TokenType.Else)) {
+            this.next() // eat else token
+            elseBlock = this.parseBlock()
+        }
+        return new IfStmt(cond, body, elseBlock)
     }
 
     // Expression order
     // 1. Primary
-    // 2. Mul
-    // 3. Add
-    // 4. Assignment
+    // 2. Binary
+    // 3. Assignment
 
     private parseExpr(): Expr {
         return this.parseAssignmentExpr()
@@ -102,7 +110,7 @@ export default class Parser {
 
     private parseAssignmentExpr(): Expr {
         const symTk = this.current()
-        let sym = this.parseAdditiveExpr()
+        let sym = this.parseBinaryExpr()
         if (this.isTypes(TokenType.Equal)) {
             if (!isNodeType(sym, NodeType.Identifier)) this.error("SyntaxError: Invalid Left hand of Assignment", symTk)
             this.next()
@@ -112,7 +120,7 @@ export default class Parser {
         return sym
     }
 
-    private parseAdditiveExpr(): Expr {
+    private parseBinaryExpr(): Expr {
         let left = this.parsePrimary()
         while (this.current().isTypes(...BinaryTokens)) {
             const op = this.next().val as BinaryType

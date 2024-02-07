@@ -298,7 +298,7 @@ describe("Control Flow", () => {
         )
     })
 
-    test.todo("Else", () => {
+    test("Else", () => {
         expect(genAST("if (a) {1} else {2}")).toEqual(
             new Block([
                 new IfStmt(
@@ -310,7 +310,7 @@ describe("Control Flow", () => {
         )
     })
 
-    test.todo("Else If", () => {
+    test("Else If", () => {
         expect(genAST("if (a) {1} else if (b) {2} else {3}")).toEqual(
             new Block([
                 new IfStmt(
