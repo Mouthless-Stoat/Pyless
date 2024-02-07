@@ -13,7 +13,8 @@ import {
 // trans could stand for transpile or it could just be trans :3
 
 export function trans(astNode: Stmt, indent: number, top: boolean = false): string {
-    let out
+    const paren = (astNode: Stmt, func: (..._: any[]) => any, ...args: any[]): string =>
+        (astNode as Expr).paren ? `(${func(astNode, indent, ...args)})` : func(astNode, indent, ...args)
     switch (astNode.type) {
         case NodeType.Block:
             return transBlock(astNode as Block, indent)
@@ -26,13 +27,10 @@ export function trans(astNode: Stmt, indent: number, top: boolean = false): stri
         case NodeType.Assignment:
             return transAssignment(astNode as AssignmentExpr, indent, top)
         case NodeType.BinaryExpr:
-            out = transBinaryExpr(astNode as BinaryExpr, indent)
-            break
+            return paren(astNode, transBinaryExpr)
         default:
             throw `This AST node have not been implemented ${NodeType[astNode.type]}`
     }
-
-    return (astNode as Expr).paren ? `(${out})` : `${out}`
 }
 
 function transBlock(block: Block, indent: number): string {

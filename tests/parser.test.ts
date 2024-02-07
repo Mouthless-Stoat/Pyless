@@ -1,6 +1,15 @@
 import { test, expect, describe } from "bun:test"
 import Parser from "../src/front/parser"
-import { BinaryExpr, NumberLiteral, Block, AssignmentExpr, Identifier, StringLiteral } from "../src/front/ast"
+import {
+    BinaryExpr,
+    NumberLiteral,
+    Block,
+    AssignmentExpr,
+    Identifier,
+    StringLiteral,
+    DictionaryLiteral,
+    Propety,
+} from "../src/front/ast"
 
 const parser = new Parser()
 
@@ -11,7 +20,7 @@ test("Basic", () => {
 })
 
 test("String", () => {
-    expect(parser.genAST('"Hello World"')).toEqual(new Block([new StringLiteral('"Hello World"')]))
+    expect(parser.genAST('"Hello World"')).toEqual(new Block([new StringLiteral("Hello World")]))
 })
 
 describe("Error", () => {
@@ -33,6 +42,10 @@ describe("Error", () => {
         expect(() => parser.genAST("1+1\n+1")).toThrow(
             new Error("SyntaxError: Unexpected Token `+` at line 2 and column 1")
         )
+    })
+
+    test("Object Comma", () => {
+        expect(() => parser.genAST("{a:1 b:10}")).toThrow(new Error("SyntaxError: Expected `,` at line 0 and column 5"))
     })
 })
 
@@ -180,6 +193,131 @@ describe("Assignment", () => {
                     )
                 ),
             ])
+        )
+    })
+})
+
+describe("Object", () => {
+    test("Basic", () => {
+        expect(parser.genAST("{a:1}")).toEqual(
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("a"), new NumberLiteral("1"))])])
+        )
+    })
+
+    test("Multiple Keys", () => {
+        expect(parser.genAST("{a:1, b:2}")).toEqual(
+            new Block([
+                new DictionaryLiteral([
+                    new Propety(new StringLiteral("a"), new NumberLiteral("1")),
+                    new Propety(new StringLiteral("b"), new NumberLiteral("2")),
+                ]),
+            ])
+        )
+    })
+
+    test("Keys Shorthand", () => {
+        expect(parser.genAST("{c}")).toEqual(
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("c"), new Identifier("c"))])])
+        )
+    })
+
+    test("Multiple Shorthand", () => {
+        expect(parser.genAST("{a, b, c}")).toEqual(
+            new Block([
+                new DictionaryLiteral([
+                    new Propety(new StringLiteral("a"), new Identifier("a")),
+                    new Propety(new StringLiteral("b"), new Identifier("b")),
+                    new Propety(new StringLiteral("c"), new Identifier("c")),
+                ]),
+            ])
+        )
+    })
+
+    test("Mixed Shorthand", () => {
+        expect(parser.genAST('{a:1, b:c, c, d:"hello"}')).toEqual(
+            new Block([
+                new DictionaryLiteral([
+                    new Propety(new StringLiteral("a"), new NumberLiteral("1")),
+                    new Propety(new StringLiteral("b"), new Identifier("c")),
+                    new Propety(new StringLiteral("c"), new Identifier("c")),
+                    new Propety(new StringLiteral("d"), new StringLiteral("hello")),
+                ]),
+            ])
+        )
+    })
+
+    test("Expression Key", () => {
+        expect(parser.genAST("{1:1}")).toEqual(
+            new Block([new DictionaryLiteral([new Propety(new NumberLiteral("1"), new NumberLiteral("1"))])])
+        )
+    })
+
+    test("Multiple Expression Key", () => {
+        expect(parser.genAST('{"hello":1}')).toEqual(
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("hello"), new NumberLiteral("1"))])])
+        )
+    })
+
+    test("Expression Shorthand", () => {
+        expect(parser.genAST("{1}")).toEqual(
+            new Block([new DictionaryLiteral([new Propety(new NumberLiteral("1"), new NumberLiteral("1"))])])
+        )
+    })
+
+    test("Multiple Expression Shorthand", () => {
+        expect(parser.genAST('{1, 2, 3+4, "hello"}')).toEqual(
+            new Block([
+                new DictionaryLiteral([
+                    new Propety(new NumberLiteral("1"), new NumberLiteral("1")),
+                    new Propety(new NumberLiteral("2"), new NumberLiteral("2")),
+                    new Propety(
+                        new BinaryExpr(new NumberLiteral("3"), new NumberLiteral("4"), "+"),
+                        new BinaryExpr(new NumberLiteral("3"), new NumberLiteral("4"), "+")
+                    ),
+                    new Propety(new StringLiteral("hello"), new StringLiteral("hello")),
+                ]),
+            ])
+        )
+    })
+
+    test("Identifier Key", () => {
+        expect(parser.genAST("{a:=1}")).toEqual(
+            new Block([new DictionaryLiteral([new Propety(new Identifier("a"), new NumberLiteral("1"))])])
+        )
+    })
+
+    test("Multiple Identifier Key", () => {
+        expect(parser.genAST("{a:=1, b:=2, c:=d}")).toEqual(
+            new Block([
+                new DictionaryLiteral([
+                    new Propety(new Identifier("a"), new NumberLiteral("1")),
+                    new Propety(new Identifier("b"), new NumberLiteral("2")),
+                    new Propety(new Identifier("c"), new Identifier("d")),
+                ]),
+            ])
+        )
+    })
+
+    test("Mixed All", () => {
+        expect(parser.genAST('{a:1, 2, c:3+4, d:=5, "hello":6}')).toEqual(
+            new Block([
+                new DictionaryLiteral([
+                    new Propety(new StringLiteral("a"), new NumberLiteral("1")),
+                    new Propety(new NumberLiteral("2"), new NumberLiteral("2")),
+                    new Propety(
+                        new StringLiteral("c"),
+                        new BinaryExpr(new NumberLiteral("3"), new NumberLiteral("4"), "+")
+                    ),
+                    new Propety(new Identifier("d"), new NumberLiteral("5")),
+                    new Propety(new StringLiteral("hello"), new NumberLiteral("6")),
+                ]),
+            ])
+        )
+    })
+
+    test("Trailling Comma", () => {
+        expect(parser.genAST("{a:1,}")).toEqual(
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("a"), new NumberLiteral("1"))])])
         )
     })
 })
