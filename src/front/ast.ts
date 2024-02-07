@@ -41,10 +41,12 @@ export class IfStmt implements Stmt {
     type = NodeType.IfStmt
     condition: Expr
     body: Block
+    elseBody?: Block
 
-    constructor(cond: Expr, body: Block) {
+    constructor(cond: Expr, body: Block, elseBody?: Block) {
         this.condition = cond
         this.body = body
+        this.elseBody = elseBody
     }
 }
 
