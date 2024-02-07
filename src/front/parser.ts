@@ -16,8 +16,7 @@ import {
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
-const Multiplicative = [TokenType.Star, TokenType.Slash] as const
-const Additive = [TokenType.Plus, TokenType.Minus] as const
+const BinaryTokens = [TokenType.Minus, TokenType.Plus, TokenType.Star, TokenType.Slash] as const
 
 export default class Parser {
     tokens: Token[] = []
@@ -114,18 +113,8 @@ export default class Parser {
     }
 
     private parseAdditiveExpr(): Expr {
-        let left = this.parseMutiplicativeExpr()
-        while (this.current().isTypes(...Additive)) {
-            const op = this.next().val as BinaryType
-            const right = this.parseMutiplicativeExpr()
-            left = new BinaryExpr(left, right, op)
-        }
-        return left
-    }
-
-    private parseMutiplicativeExpr(): Expr {
         let left = this.parsePrimary()
-        while (this.current().isTypes(...Multiplicative)) {
+        while (this.current().isTypes(...BinaryTokens)) {
             const op = this.next().val as BinaryType
             const right = this.parsePrimary()
             left = new BinaryExpr(left, right, op)

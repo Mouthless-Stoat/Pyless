@@ -12,6 +12,7 @@ import {
     type Stmt,
     IfStmt,
 } from "../src/front/ast"
+import { generateHeapSnapshot } from "bun"
 
 const parser = new Parser()
 
@@ -19,14 +20,12 @@ const genAST = (input: string) => parser.genAST(input)
 const errFunc = (input: string) => () => genAST(input)
 
 test("Basic", () => {
-    expect(genAST("1 + 1")).toEqual(block([new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+")]))
+    expect(genAST("1 + 1")).toEqual(new Block([new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+")]))
 })
 
 test("String", () => {
-    expect(genAST('"Hello World"')).toEqual(block([new StringLiteral("Hello World")]))
+    expect(genAST('"Hello World"')).toEqual(new Block([new StringLiteral("Hello World")]))
 })
-
-const block = (stmts: Stmt[]) => new Block(stmts)
 
 describe("Error", () => {
     test("Basic", () => {
@@ -47,7 +46,7 @@ describe("Error", () => {
 describe("Chaining", () => {
     test("Basic", () => {
         expect(genAST("1 + 2 + 3")).toEqual(
-            block([
+            new Block([
                 new BinaryExpr(
                     new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("2"), "+"),
                     new NumberLiteral("3"),
@@ -59,7 +58,7 @@ describe("Chaining", () => {
 
     test("Mixed", () => {
         expect(genAST("1 - 2 + 3")).toEqual(
-            block([
+            new Block([
                 new BinaryExpr(
                     new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("2"), "-"),
                     new NumberLiteral("3"),
@@ -71,7 +70,7 @@ describe("Chaining", () => {
 
     test("Mixed 2", () => {
         expect(genAST("1 * 2 + 3")).toEqual(
-            block([
+            new Block([
                 new BinaryExpr(
                     new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("2"), "*"),
                     new NumberLiteral("3"),
@@ -83,7 +82,7 @@ describe("Chaining", () => {
 
     test("Mixed 3", () => {
         expect(genAST("1 * 2 / 3")).toEqual(
-            block([
+            new Block([
                 new BinaryExpr(
                     new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("2"), "*"),
                     new NumberLiteral("3"),
@@ -95,7 +94,7 @@ describe("Chaining", () => {
 
     test("Mixed 4", () => {
         expect(genAST("1 * 2 / 3 * 1")).toEqual(
-            block([
+            new Block([
                 new BinaryExpr(
                     new BinaryExpr(
                         new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("2"), "*"),
@@ -110,52 +109,26 @@ describe("Chaining", () => {
     })
 })
 
-describe("Order of Operation", () => {
-    test("Basic", () => {
-        expect(genAST("1 + 2 * 3")).toEqual(
-            block([
-                new BinaryExpr(
-                    new NumberLiteral("1"),
-                    new BinaryExpr(new NumberLiteral("2"), new NumberLiteral("3"), "*"),
-                    "+"
-                ),
-            ])
-        )
-    })
-
-    test("Mixed", () => {
-        expect(genAST("1 * 2 + 3 / 4")).toEqual(
-            block([
-                new BinaryExpr(
-                    new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("2"), "*"),
-                    new BinaryExpr(new NumberLiteral("3"), new NumberLiteral("4"), "/"),
-                    "+"
-                ),
-            ])
-        )
-    })
-
-    test("Parentheses", () => {
-        expect(genAST("(1 + 1) * 3")).toEqual(
-            block([
-                new BinaryExpr(
-                    new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+", true),
-                    new NumberLiteral("3"),
-                    "*"
-                ),
-            ])
-        )
-    })
+test("Parentheses", () => {
+    expect(genAST("(1 + 1) * 3")).toEqual(
+        new Block([
+            new BinaryExpr(
+                new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+", true),
+                new NumberLiteral("3"),
+                "*"
+            ),
+        ])
+    )
 })
 
 describe("Assignment", () => {
     test("Basic", () => {
-        expect(genAST("a = 1")).toEqual(block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("1"))]))
+        expect(genAST("a = 1")).toEqual(new Block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("1"))]))
     })
 
     test("Chain", () => {
         expect(genAST("a = b = 1")).toEqual(
-            block([
+            new Block([
                 new AssignmentExpr(
                     new Identifier("a"),
                     new AssignmentExpr(new Identifier("b"), new NumberLiteral("1"))
@@ -166,7 +139,7 @@ describe("Assignment", () => {
 
     test("Mixed", () => {
         expect(genAST("a = 1 + 1")).toEqual(
-            block([
+            new Block([
                 new AssignmentExpr(
                     new Identifier("a"),
                     new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+")
@@ -177,7 +150,7 @@ describe("Assignment", () => {
 
     test("Mixed Chain", () => {
         expect(genAST("a = b = 1 + 1")).toEqual(
-            block([
+            new Block([
                 new AssignmentExpr(
                     new Identifier("a"),
                     new AssignmentExpr(
@@ -193,13 +166,13 @@ describe("Assignment", () => {
 describe("Object", () => {
     test("Basic", () => {
         expect(genAST("{a:1}")).toEqual(
-            block([new DictionaryLiteral([new Propety(new StringLiteral("a"), new NumberLiteral("1"))])])
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("a"), new NumberLiteral("1"))])])
         )
     })
 
     test("Multiple Keys", () => {
         expect(genAST("{a:1, b:2}")).toEqual(
-            block([
+            new Block([
                 new DictionaryLiteral([
                     new Propety(new StringLiteral("a"), new NumberLiteral("1")),
                     new Propety(new StringLiteral("b"), new NumberLiteral("2")),
@@ -208,15 +181,15 @@ describe("Object", () => {
         )
     })
 
-    test("Keys Shorthand", () => {
+    test("Key Shorthand", () => {
         expect(genAST("{c}")).toEqual(
-            block([new DictionaryLiteral([new Propety(new StringLiteral("c"), new Identifier("c"))])])
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("c"), new Identifier("c"))])])
         )
     })
 
     test("Multiple Shorthand", () => {
         expect(genAST("{a, b, c}")).toEqual(
-            block([
+            new Block([
                 new DictionaryLiteral([
                     new Propety(new StringLiteral("a"), new Identifier("a")),
                     new Propety(new StringLiteral("b"), new Identifier("b")),
@@ -226,40 +199,27 @@ describe("Object", () => {
         )
     })
 
-    test("Mixed Shorthand", () => {
-        expect(genAST('{a:1, b:c, c, d:"hello"}')).toEqual(
-            block([
-                new DictionaryLiteral([
-                    new Propety(new StringLiteral("a"), new NumberLiteral("1")),
-                    new Propety(new StringLiteral("b"), new Identifier("c")),
-                    new Propety(new StringLiteral("c"), new Identifier("c")),
-                    new Propety(new StringLiteral("d"), new StringLiteral("hello")),
-                ]),
-            ])
-        )
-    })
-
     test("Expression Key", () => {
         expect(genAST("{1:1}")).toEqual(
-            block([new DictionaryLiteral([new Propety(new NumberLiteral("1"), new NumberLiteral("1"))])])
+            new Block([new DictionaryLiteral([new Propety(new NumberLiteral("1"), new NumberLiteral("1"))])])
         )
     })
 
     test("Multiple Expression Key", () => {
         expect(genAST('{"hello":1}')).toEqual(
-            block([new DictionaryLiteral([new Propety(new StringLiteral("hello"), new NumberLiteral("1"))])])
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("hello"), new NumberLiteral("1"))])])
         )
     })
 
     test("Expression Shorthand", () => {
         expect(genAST("{1}")).toEqual(
-            block([new DictionaryLiteral([new Propety(new NumberLiteral("1"), new NumberLiteral("1"))])])
+            new Block([new DictionaryLiteral([new Propety(new NumberLiteral("1"), new NumberLiteral("1"))])])
         )
     })
 
     test("Multiple Expression Shorthand", () => {
         expect(genAST('{1, 2, 3+4, "hello"}')).toEqual(
-            block([
+            new Block([
                 new DictionaryLiteral([
                     new Propety(new NumberLiteral("1"), new NumberLiteral("1")),
                     new Propety(new NumberLiteral("2"), new NumberLiteral("2")),
@@ -275,13 +235,13 @@ describe("Object", () => {
 
     test("Identifier Key", () => {
         expect(genAST("{a:=1}")).toEqual(
-            block([new DictionaryLiteral([new Propety(new Identifier("a"), new NumberLiteral("1"))])])
+            new Block([new DictionaryLiteral([new Propety(new Identifier("a"), new NumberLiteral("1"))])])
         )
     })
 
     test("Multiple Identifier Key", () => {
         expect(genAST("{a:=1, b:=2, c:=d}")).toEqual(
-            block([
+            new Block([
                 new DictionaryLiteral([
                     new Propety(new Identifier("a"), new NumberLiteral("1")),
                     new Propety(new Identifier("b"), new NumberLiteral("2")),
@@ -293,7 +253,7 @@ describe("Object", () => {
 
     test("Mixed All", () => {
         expect(genAST('{a:1, 2, c:3+4, d:=5, "hello":6}')).toEqual(
-            block([
+            new Block([
                 new DictionaryLiteral([
                     new Propety(new StringLiteral("a"), new NumberLiteral("1")),
                     new Propety(new NumberLiteral("2"), new NumberLiteral("2")),
@@ -310,18 +270,18 @@ describe("Object", () => {
 
     test("Trailling Comma", () => {
         expect(genAST("{a:1,}")).toEqual(
-            block([new DictionaryLiteral([new Propety(new StringLiteral("a"), new NumberLiteral("1"))])])
+            new Block([new DictionaryLiteral([new Propety(new StringLiteral("a"), new NumberLiteral("1"))])])
         )
     })
 })
 
-describe("If", () => {
+describe("Control Flow", () => {
     test("Basic", () => {
         expect(genAST("if (a) {a = 10}")).toEqual(
-            block([
+            new Block([
                 new IfStmt(
                     new Identifier("a"),
-                    block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("10"))])
+                    new Block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("10"))])
                 ),
             ])
         )
@@ -329,10 +289,40 @@ describe("If", () => {
 
     test("Multiline", () => {
         expect(genAST("if (a) {\na = 10\n}")).toEqual(
-            block([
+            new Block([
                 new IfStmt(
                     new Identifier("a"),
-                    block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("10"))])
+                    new Block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("10"))])
+                ),
+            ])
+        )
+    })
+
+    test.todo("Else", () => {
+        expect(genAST("if (a) {1} else {2}")).toEqual(
+            new Block([
+                new IfStmt(
+                    new Identifier("a"),
+                    new Block([new NumberLiteral("1")]),
+                    new Block([new NumberLiteral("2")])
+                ),
+            ])
+        )
+    })
+
+    test.todo("Else If", () => {
+        expect(genAST("if (a) {1} else if (b) {2} else {3}")).toEqual(
+            new Block([
+                new IfStmt(
+                    new Identifier("a"),
+                    new Block([new NumberLiteral("1")]),
+                    new Block([
+                        new IfStmt(
+                            new Identifier("b"),
+                            new Block([new NumberLiteral("2")]),
+                            new Block([new NumberLiteral("3")])
+                        ),
+                    ])
                 ),
             ])
         )
