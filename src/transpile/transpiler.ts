@@ -8,6 +8,7 @@ import {
     BinaryExpr,
     type Expr,
     StringLiteral,
+    DictionaryLiteral,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -23,11 +24,13 @@ export function trans(astNode: Stmt, indent: number, top: boolean = false): stri
         case NodeType.NumberLiteral:
             return (astNode as NumberLiteral).number
         case NodeType.StringLiteral:
-            return (astNode as StringLiteral).content
+            return `"${(astNode as StringLiteral).content}"`
         case NodeType.Assignment:
             return transAssignment(astNode as AssignmentExpr, indent, top)
         case NodeType.BinaryExpr:
             return paren(astNode, transBinaryExpr)
+        case NodeType.DictionaryLiteral:
+            return transDict(astNode as DictionaryLiteral, indent)
         default:
             throw `This AST node have not been implemented ${NodeType[astNode.type]}`
     }
@@ -51,6 +54,16 @@ function transAssignment(assignment: AssignmentExpr, indent: number, top: boolea
     } else val = trans(assignment.value, indent)
 
     return top ? `${sym} = ${val}` : `(${sym} := ${val})`
+}
+
+function transDict(dict: DictionaryLiteral, ident: number): string {
+    let out = "{ "
+    for (const [i, prop] of dict.propeties.entries()) {
+        out +=
+            `${trans(prop.key, ident, false)}: ${trans(prop.value, ident, false)}` +
+            (i !== dict.propeties.length - 1 ? ", " : "")
+    }
+    return out + " }"
 }
 
 function transBinaryExpr(binary: BinaryExpr, indent: number): string {
