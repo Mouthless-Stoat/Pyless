@@ -35,8 +35,8 @@ export function trans(astNode: Stmt, indent: number, top: boolean = false): stri
 
 function transBlock(block: Block, indent: number): string {
     let out = ""
-    for (const stmt of block.body) {
-        out += "    ".repeat(indent + 1) + trans(stmt, indent + 1, true)
+    for (const [i, stmt] of block.body.entries()) {
+        out += "    ".repeat(indent + 1) + trans(stmt, indent + 1, true) + (i !== block.body.length - 1 ? "\n" : "")
     }
     return out
 }

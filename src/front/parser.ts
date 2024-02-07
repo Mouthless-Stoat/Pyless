@@ -12,6 +12,7 @@ import {
     DictionaryLiteral,
     isNodeType,
     NodeType,
+    IfStmt,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -23,6 +24,10 @@ export default class Parser {
 
     private current(): Token {
         return this.tokens[0]
+    }
+
+    private notEOF(): boolean {
+        return !this.current().isTypes(TokenType.EOF)
     }
 
     private next(): Token {
@@ -46,23 +51,51 @@ export default class Parser {
         return this.current().isTypes(...types)
     }
 
+    private parseBlock(): Block {
+        this.expect(TokenType.OpenBrace, "SyntaxError: Expected `{`")
+        const body: Stmt[] = []
+        while (!this.isTypes(TokenType.CloseBrace)) {
+            body.push(this.parseStmt())
+        }
+        this.expect(TokenType.CloseBrace, "SyntaxError: Expected `}`")
+        return new Block(body)
+    }
+
     genAST(source: string): Block {
         const body: Stmt[] = []
 
         this.tokens = tokenize(source)
 
-        while (this.tokens.length > 0) {
+        while (this.notEOF() && this.tokens.length > 0) {
             body.push(this.parseStmt())
-            const token = this.next()
-            if (!token.isTypes(TokenType.EOL)) this.error("", token, true)
         }
 
         return new Block(body)
     }
 
     private parseStmt(): Stmt {
-        return this.parseExpr()
+        switch (this.current().type) {
+            case TokenType.If:
+                return this.parseIfStmt()
+            default:
+                return this.parseExpr()
+        }
     }
+
+    private parseIfStmt(): Stmt {
+        this.next() // eat the if token
+        this.expect(TokenType.OpenParen, "SyntaxError: Expected `(`")
+        const cond = this.parseExpr()
+        this.expect(TokenType.CloseParen, "SyntaxError: Expected `)`")
+        const body = this.parseBlock()
+        return new IfStmt(cond, body)
+    }
+
+    // Expression order
+    // 1. Primary
+    // 2. Mul
+    // 3. Add
+    // 4. Assignment
 
     private parseExpr(): Expr {
         return this.parseAssignmentExpr()
@@ -118,9 +151,7 @@ export default class Parser {
             case TokenType.OpenBrace:
                 return this.parseDict()
             default:
-                const token = this.current()
-                if (token.isTypes(TokenType.EOL)) throw `SyntaxError: Unexpected End of Line on line ${token.row + 1}`
-                return this.error("", token, true)
+                return this.error("", this.next(), true)
         }
     }
 

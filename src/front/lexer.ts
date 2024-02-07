@@ -22,8 +22,10 @@ export enum TokenType {
     Walrus,
 
     Function,
+    If,
+    Else,
 
-    EOL,
+    EOF,
 }
 
 const symbolToken = {
@@ -42,12 +44,12 @@ const symbolToken = {
     "%": TokenType.Percent,
     "=": TokenType.Equal,
     ":": TokenType.Colon,
-    "\n": TokenType.EOL,
-    ";": TokenType.EOL,
 } as const
 
 const keywordToken = {
     fn: TokenType.Function,
+    if: TokenType.If,
+    else: TokenType.Else,
 } as const
 
 export class Token {
@@ -72,7 +74,7 @@ export class Token {
     }
 }
 
-export function tokenize(input = ""): Token[] {
+export function tokenize(input = "", addEOF = true): Token[] {
     const srcLines = input.replace("\r\n", "\n").split("\n") // window shit
     const tokens: Token[] = []
 
@@ -82,7 +84,7 @@ export function tokenize(input = ""): Token[] {
     // else it's a symbol (sym)
     for (const [row, line] of srcLines.entries()) {
         for (const { groups: token, index: col } of line.matchAll(
-            /(?<string>"(?:\\.|[^"\\])*")|(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e-?\d+)?)|(?<sym>[^\s])/g
+            /(?<string>"(?:\\.|[^"\\])*")|(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e-?\d+)?)|(?<sym>[^\s\n\t\r])/g
         )) {
             if (!token) throw `What is this token type`
 
@@ -110,9 +112,8 @@ export function tokenize(input = ""): Token[] {
                 tokens.push(new Token(TokenType.String, row, col ?? -1, token.string))
             }
         }
-
-        tokens.push(new Token(TokenType.EOL, row, -1, "EOL"))
     }
 
+    if (addEOF) tokens.push(new Token(TokenType.EOF, -1, -1, "EOF"))
     return tokens
 }

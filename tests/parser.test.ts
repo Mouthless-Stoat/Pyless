@@ -10,6 +10,7 @@ import {
     DictionaryLiteral,
     Propety,
     type Stmt,
+    IfStmt,
 } from "../src/front/ast"
 
 const parser = new Parser()
@@ -30,18 +31,6 @@ const block = (stmts: Stmt[]) => new Block(stmts)
 describe("Error", () => {
     test("Basic", () => {
         expect(errFunc("+")).toThrow(new Error("SyntaxError: Unexpected Token `+` at line 1 and column 1"))
-    })
-
-    test("Unexpected EOF", () => {
-        expect(errFunc("1+")).toThrow(new Error("SyntaxError: Unexpected End of Line on line 1"))
-    })
-
-    test("Unexpected Token", () => {
-        expect(errFunc("1 2")).toThrow(new Error("SyntaxError: Unexpected Token `2` at line 1 and column 3"))
-    })
-
-    test("Multiline Unexpected Token", () => {
-        expect(errFunc("1+1\n+1")).toThrow(new Error("SyntaxError: Unexpected Token `+` at line 2 and column 1"))
     })
 
     test("Object Comma", () => {
@@ -322,6 +311,30 @@ describe("Object", () => {
     test("Trailling Comma", () => {
         expect(genAST("{a:1,}")).toEqual(
             block([new DictionaryLiteral([new Propety(new StringLiteral("a"), new NumberLiteral("1"))])])
+        )
+    })
+})
+
+describe("If", () => {
+    test("Basic", () => {
+        expect(genAST("if (a) {a = 10}")).toEqual(
+            block([
+                new IfStmt(
+                    new Identifier("a"),
+                    block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("10"))])
+                ),
+            ])
+        )
+    })
+
+    test("Multiline", () => {
+        expect(genAST("if (a) {\na = 10\n}")).toEqual(
+            block([
+                new IfStmt(
+                    new Identifier("a"),
+                    block([new AssignmentExpr(new Identifier("a"), new NumberLiteral("10"))])
+                ),
+            ])
         )
     })
 })

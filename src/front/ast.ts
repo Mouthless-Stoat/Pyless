@@ -3,6 +3,7 @@ export enum NodeType {
 
     // stmt
     Assignment,
+    IfStmt,
 
     // expr
     Identifier,
@@ -32,6 +33,17 @@ export class Block implements Stmt {
     body: Stmt[]
 
     constructor(body: Stmt[]) {
+        this.body = body
+    }
+}
+
+export class IfStmt implements Stmt {
+    type = NodeType.IfStmt
+    condition: Expr
+    body: Block
+
+    constructor(cond: Expr, body: Block) {
+        this.condition = cond
         this.body = body
     }
 }
