@@ -32,9 +32,14 @@ export default class Parser {
     private expect(type: TokenType, err: string, detail: boolean = true): Token {
         const tk = this.next()
         if (!tk || !tk.isTypes(type)) {
-            throw err + (detail ? ` at line ${tk.row} and column ${tk.col}` : "")
+            throw err + (detail ? ` at line ${tk.row + 1} and column ${tk.col + 1}` : "")
         }
         return tk
+    }
+
+    private error(err: string, token: Token, auto: boolean = false): never {
+        if (auto) err = `SyntaxError: Unexpected Token \`${token.val}\``
+        throw err + ` at line ${token.row + 1} and column ${token.col + 1}`
     }
 
     private isTypes(...types: TokenType[]): boolean {
@@ -49,11 +54,7 @@ export default class Parser {
         while (this.tokens.length > 0) {
             body.push(this.parseStmt())
             const token = this.next()
-            if (!token.isTypes(TokenType.EOL)) {
-                throw `SyntaxError: Unexpected Token \`${token.val}\` at line ${token.row + 1} and column ${
-                    token.col + 1
-                }`
-            }
+            if (!token.isTypes(TokenType.EOL)) this.error("", token, true)
         }
 
         return new Block(body)
@@ -68,8 +69,10 @@ export default class Parser {
     }
 
     private parseAssignmentExpr(): Expr {
+        const symTk = this.current()
         let sym = this.parseAdditiveExpr()
         if (this.isTypes(TokenType.Equal)) {
+            if (!isNodeType(sym, NodeType.Identifier)) this.error("SyntaxError: Invalid Left hand of Assignment", symTk)
             this.next()
             const val = this.parseExpr()
             return new AssignmentExpr(sym, val)
@@ -117,9 +120,7 @@ export default class Parser {
             default:
                 const token = this.current()
                 if (token.isTypes(TokenType.EOL)) throw `SyntaxError: Unexpected End of Line on line ${token.row + 1}`
-                throw `SyntaxError: Unexpected Token \`${token.val}\` at line ${token.row + 1} and column ${
-                    token.col + 1
-                }`
+                return this.error("", token, true)
         }
     }
 
@@ -127,7 +128,7 @@ export default class Parser {
         this.expect(TokenType.OpenBrace, "PylessBug: Expected `{`")
         const prop: Propety[] = []
         while (!this.isTypes(TokenType.CloseBrace)) {
-            const keyPos = [this.current().row, this.current().col]
+            const keyTk = this.current()
             const key = this.parseExpr()
 
             let keyStr
@@ -150,7 +151,7 @@ export default class Parser {
             const val = this.parseExpr()
 
             if (!isNodeType(key, NodeType.Identifier) && !isString)
-                throw `SyntaxError: Expected Identifier at line ${keyPos[0]} and column ${keyPos[1]}`
+                this.error(`SyntaxError: Expected Identifier`, keyTk)
 
             prop.push(new Propety(isString ? keyStr ?? key : key, val))
 
