@@ -1,6 +1,7 @@
 export enum TokenType {
     Number,
     String,
+    Comment,
     Symbol,
 
     OpenParen,
@@ -84,7 +85,7 @@ export function tokenize(input = "", addEOF = true): Token[] {
     // else it's a symbol (sym)
     for (const [row, line] of srcLines.entries()) {
         for (const { groups: token, index: col } of line.matchAll(
-            /(?<string>"(?:\\.|[^"\\])*")|(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e-?\d+)?)|(?<sym>[^\s\n\t\r])/g
+            /(?:\/\/(?<comment>.*))|(?<string>"(?:\\.|[^"\\])*")|(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e-?\d+)?)|(?<sym>[^\s\n\t\r])/g
         )) {
             if (!token) throw `What is this token type`
 
@@ -110,6 +111,8 @@ export function tokenize(input = "", addEOF = true): Token[] {
                 tokens.push(new Token(TokenType.Number, row, col ?? -1, token.num))
             } else if (token.string) {
                 tokens.push(new Token(TokenType.String, row, col ?? -1, token.string))
+            } else if (token.comment) {
+                tokens.push(new Token(TokenType.Comment, row, col ?? -1, token.comment.trim()))
             }
         }
     }

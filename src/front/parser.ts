@@ -14,6 +14,7 @@ import {
     NodeType,
     IfStmt,
     CallExpr,
+    Comment,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -37,14 +38,15 @@ export default class Parser {
     private expect(type: TokenType, err: string, detail: boolean = true): Token {
         const tk = this.next()
         if (!tk || !tk.isTypes(type)) {
-            throw err + (detail ? ` at line ${tk.row + 1} and column ${tk.col + 1}` : "")
+            throw err + (detail ? ` on line ${tk.row + 1} and column ${tk.col + 1}` : "")
         }
         return tk
     }
 
     private error(err: string, token: Token, auto: boolean = false): never {
         if (auto) err = `SyntaxError: Unexpected Token \`${token.val}\``
-        throw err + ` at line ${token.row + 1} and column ${token.col + 1}`
+        if (token.isTypes(TokenType.EOF)) throw `SyntaxError: Unexpected End of File`
+        throw err + ` on line ${token.row + 1} and column ${token.col + 1}`
     }
 
     private isTypes(...types: TokenType[]): boolean {
@@ -96,13 +98,15 @@ export default class Parser {
         switch (this.current().type) {
             case TokenType.If:
                 return this.parseIfStmt()
+            case TokenType.Comment:
+                return new Comment(this.next().val)
             default:
                 return this.parseExpr()
         }
     }
 
     private parseIfStmt(): Stmt {
-        this.next() // eat the if token
+        this.next() // eon the if token
         this.expect(TokenType.OpenParen, "SyntaxError: Expected `(`")
         const cond = this.parseExpr()
         this.expect(TokenType.CloseParen, "SyntaxError: Expected `)`")
@@ -110,7 +114,7 @@ export default class Parser {
 
         let elseBlock
         if (this.isTypes(TokenType.Else)) {
-            this.next() // eat else token
+            this.next() // eon else token
             elseBlock = this.parseBlock()
         }
         return new IfStmt(cond, body, elseBlock)
@@ -174,6 +178,8 @@ export default class Parser {
                 return expr
             case TokenType.OpenBrace:
                 return this.parseDict()
+            case TokenType.Comment:
+                this.error("SyntaxError: Unexpected Comment", this.next())
             default:
                 return this.error("", this.next(), true)
         }

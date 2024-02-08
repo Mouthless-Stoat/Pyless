@@ -1,5 +1,6 @@
 export enum NodeType {
     Block,
+    Comment,
 
     // stmt
     Assignment,
@@ -35,6 +36,15 @@ export class Block implements Stmt {
 
     constructor(body: Stmt[]) {
         this.body = body
+    }
+}
+
+export class Comment implements Stmt {
+    type = NodeType.Comment
+    content: string
+
+    constructor(content: string) {
+        this.content = content
     }
 }
 

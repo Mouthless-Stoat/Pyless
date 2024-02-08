@@ -13,6 +13,7 @@ import {
     IfStmt,
     isNodeType,
     CallExpr,
+    Comment,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -39,6 +40,8 @@ export function trans(node: Stmt, indent: number, top: boolean = false): string 
             return transIfStmt(node as IfStmt, indent)
         case NodeType.CallExpr:
             return transCallExpr(node as CallExpr, indent)
+        case NodeType.Comment:
+            return `# ${(node as Comment).content.trim()}`
         default:
             throw `This AST node have not been implemented ${NodeType[node.type]}`
     }
@@ -50,12 +53,19 @@ function transBlock(block: Block, indent: number): string {
     if (block.body.length === 1) {
         return trans(block.body[0], indent + 1, true)
     }
-    for (const stmt of block.body) {
-        out +=
-            trans(stmt, indent, true)
-                .split("\n")
-                .map((s) => idc.repeat(indent + 1) + s)
-                .join("\n") + "\n"
+    let i = 0
+    while (i < block.body.length) {
+        out += trans(block.body[i] as Stmt, indent, true)
+            .split("\n")
+            .map((s) => idc.repeat(indent + 1) + s)
+            .join("\n")
+
+        if (block.body[i + 1] && isNodeType(block.body[i + 1], NodeType.Comment)) {
+            i++
+            out += ` ${trans(block.body[i] as Stmt, indent)}`
+        }
+        out += "\n"
+        i++
     }
     out = out.slice(0, -1)
     return out
