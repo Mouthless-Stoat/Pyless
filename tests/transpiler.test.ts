@@ -6,7 +6,7 @@ const parser = new Parser()
 
 function test(name: string, input: string, output: string) {
     t(name, () => {
-        expect(trans(parser.genAST(input), -1)).toBe(output.replaceAll("\t", idc))
+        expect(trans(parser.genAST(input), -1)).toBe(output.replaceAll("\t", idc)) // replace tab with the indent char
     })
 }
 
