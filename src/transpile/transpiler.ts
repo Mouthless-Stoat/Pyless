@@ -40,7 +40,7 @@ export function trans(node: Stmt, indent: number, top: boolean = false): string 
     }
 }
 
-export const idc = "    " // indent token shorten cus it look nicer
+export const idc = "    " // indent char shorten cus it look nicer
 function transBlock(block: Block, indent: number): string {
     let out = ""
     if (block.body.length === 1) {
@@ -71,6 +71,7 @@ function transAssignment(assignment: AssignmentExpr, indent: number, top: boolea
 function transDict(dict: DictionaryLiteral, ident: number): string {
     let out = "{ "
     for (const [i, prop] of dict.propeties.entries()) {
+        // only put , at the end
         out +=
             `${trans(prop.key, ident, false)}: ${trans(prop.value, ident, false)}` +
             (i !== dict.propeties.length - 1 ? ", " : "")
@@ -92,11 +93,12 @@ function transIfStmt(stmt: IfStmt, indent: number): string {
     const bodyStr = stmt.body.body.length === 1 ? ` ${body}` : `\n${body}`
     let elseStr = ""
 
-    if (elseBody) {
+    // shit for cleanign single line else
+    if (elseBody && stmt.elseBody) {
         elseStr += "\nelse:"
-        if (stmt.elseBody?.body.length === 1 && isNodeType(stmt.elseBody.body[0], NodeType.IfStmt))
+        if (stmt.elseBody.body.length === 1 && isNodeType(stmt.elseBody.body[0], NodeType.IfStmt))
             elseStr = `\nel${trans(stmt.elseBody, indent - 1)}`
-        else elseStr += stmt.elseBody?.body.length === 1 ? ` ${elseBody}` : `\n${elseBody}`
+        else elseStr += stmt.elseBody.body.length === 1 ? ` ${elseBody}` : `\n${elseBody}`
     }
     return `if ${cond}:${bodyStr}${elseStr}`
 }
