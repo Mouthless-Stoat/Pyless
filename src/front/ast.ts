@@ -8,6 +8,7 @@ export enum NodeType {
     // expr
     Identifier,
     BinaryExpr,
+    CallExpr,
 
     // literal
     NumberLiteral,
@@ -122,5 +123,16 @@ export class BinaryExpr implements Expr {
         this.right = right
         this.operator = op
         this.paren = paren ?? false
+    }
+}
+
+export class CallExpr implements Expr {
+    type = NodeType.CallExpr
+    caller: Expr
+    args: Expr[]
+
+    constructor(caller: Expr, args: Expr[]) {
+        this.caller = caller
+        this.args = args
     }
 }

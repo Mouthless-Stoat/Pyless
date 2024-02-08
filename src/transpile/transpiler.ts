@@ -1,3 +1,4 @@
+import type { SignatureHelpTriggerReason } from "typescript"
 import {
     NodeType,
     type Block,
@@ -11,6 +12,7 @@ import {
     DictionaryLiteral,
     IfStmt,
     isNodeType,
+    CallExpr,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -35,6 +37,8 @@ export function trans(node: Stmt, indent: number, top: boolean = false): string 
             return transDict(node as DictionaryLiteral, indent)
         case NodeType.IfStmt:
             return transIfStmt(node as IfStmt, indent)
+        case NodeType.CallExpr:
+            return transCallExpr(node as CallExpr, indent)
         default:
             throw `This AST node have not been implemented ${NodeType[node.type]}`
     }
@@ -46,13 +50,14 @@ function transBlock(block: Block, indent: number): string {
     if (block.body.length === 1) {
         return trans(block.body[0], indent + 1, true)
     }
-    for (const [i, stmt] of block.body.entries()) {
+    for (const stmt of block.body) {
         out +=
             trans(stmt, indent, true)
                 .split("\n")
                 .map((s) => idc.repeat(indent + 1) + s)
-                .join("\n") + (i !== block.body.length - 1 ? "\n" : "")
+                .join("\n") + "\n"
     }
+    out = out.slice(0, -1)
     return out
 }
 
@@ -70,12 +75,11 @@ function transAssignment(assignment: AssignmentExpr, indent: number, top: boolea
 
 function transDict(dict: DictionaryLiteral, ident: number): string {
     let out = "{ "
-    for (const [i, prop] of dict.propeties.entries()) {
+    for (const prop of dict.propeties) {
         // only put , at the end
-        out +=
-            `${trans(prop.key, ident, false)}: ${trans(prop.value, ident, false)}` +
-            (i !== dict.propeties.length - 1 ? ", " : "")
+        out += `${trans(prop.key, ident, false)}: ${trans(prop.value, ident, false)}` + ", "
     }
+    out = out.slice(0, -2)
     return out + " }"
 }
 
@@ -101,4 +105,17 @@ function transIfStmt(stmt: IfStmt, indent: number): string {
         else elseStr += stmt.elseBody.body.length === 1 ? ` ${elseBody}` : `\n${elseBody}`
     }
     return `if ${cond}:${bodyStr}${elseStr}`
+}
+
+function transCallExpr(call: CallExpr, indent: number): string {
+    const caller = trans(call.caller, indent)
+
+    let args = ""
+    for (const arg of call.args) {
+        args += trans(arg, indent) + ", "
+    }
+
+    args = args.slice(0, -2)
+
+    return `${caller}(${args})`
 }

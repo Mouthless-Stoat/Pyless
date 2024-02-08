@@ -10,12 +10,6 @@ function test(name: string, input: string, output: string) {
     })
 }
 
-function tdTest(name: string, input: string, output: string) {
-    t.todo(name, () => {
-        expect(trans(parser.genAST(input), -1)).toBe(output.replaceAll("\t", idc))
-    })
-}
-
 test("Basic", "1 + 1", "1 + 1")
 test("Multiline", "1 2 a = 3 4 + 5", "1\n2\na = 3\n4 + 5")
 
@@ -78,4 +72,10 @@ describe("Control Flow", () => {
 
     test("Nested", "if (a) {a\nif (a){a b}}", "if a:\n\ta\n\tif a:\n\t\ta\n\t\tb")
     test("Nested 2", "if (a) {a\nif (a){a if (a) {a b}}}", "if a:\n\ta\n\tif a:\n\t\ta\n\t\tif a:\n\t\t\ta\n\t\t\tb")
+})
+
+describe("Function Call", () => {
+    test("Basic", "print()", "print()")
+    test("Arg", 'print("Hello World")', 'print("Hello World")')
+    test("Multiple Args", 'print("Hello", "World")', 'print("Hello", "World")')
 })

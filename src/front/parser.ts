@@ -13,6 +13,7 @@ import {
     isNodeType,
     NodeType,
     IfStmt,
+    CallExpr,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -63,6 +64,22 @@ export default class Parser {
         return new Block(body)
     }
 
+    private parseArgs(): Expr[] {
+        this.expect(TokenType.OpenParen, "Pyless: Expected `(`")
+
+        let args: Expr[] = []
+
+        if (!this.isTypes(TokenType.CloseParen)) {
+            args = [this.parseExpr()]
+            while (this.isTypes(TokenType.Comma) && this.next()) {
+                args.push(this.parseExpr())
+            }
+        }
+        this.expect(TokenType.CloseParen, "SyntaxError: Expected `)`")
+
+        return args
+    }
+
     genAST(source: string): Block {
         const body: Stmt[] = []
 
@@ -101,8 +118,9 @@ export default class Parser {
 
     // Expression order
     // 1. Primary
-    // 2. Binary
-    // 3. Assignment
+    // 2. Call
+    // 3. Binary
+    // 4. Assignment
 
     private parseExpr(): Expr {
         return this.parseAssignmentExpr()
@@ -121,13 +139,22 @@ export default class Parser {
     }
 
     private parseBinaryExpr(): Expr {
-        let left = this.parsePrimary()
+        let left = this.parseCallExpr()
         while (this.current().isTypes(...BinaryTokens)) {
             const op = this.next().val as BinaryType
-            const right = this.parsePrimary()
+            const right = this.parseCallExpr()
             left = new BinaryExpr(left, right, op)
         }
         return left
+    }
+
+    private parseCallExpr(): Expr {
+        let caller = this.parsePrimary()
+        while (this.isTypes(TokenType.OpenParen)) {
+            const args = this.parseArgs()
+            caller = new CallExpr(caller, args)
+        }
+        return caller
     }
 
     private parsePrimary(): Expr {
