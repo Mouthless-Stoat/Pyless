@@ -28,7 +28,7 @@ describe("Lex", () => {
         new Token(TokenType.CloseBracket, 0, 6, "]"),
     ])
 
-    test("Multi-line", "hello\n12", [
+    test("Multiline", "hello\n12", [
         new Token(TokenType.Symbol, 0, 0, "hello"),
         new Token(TokenType.Number, 1, 0, "12"),
     ])

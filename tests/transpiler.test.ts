@@ -87,6 +87,7 @@ describe("Trans", () => {
 
     describe("Comment", () => {
         test("Basic", "//hello world", "# hello world")
+        test("Multiline", "1 + 1 //hello world\n1 + 1 //another", "1 + 1 # hello world\n1 + 1 # another")
         test("Code", "1 + 1 //hello world", "1 + 1 # hello world")
     })
 })

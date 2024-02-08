@@ -14,7 +14,6 @@ import {
     CallExpr,
     Comment,
 } from "../src/front/ast"
-import { decodedTextSpanIntersectsWith } from "typescript"
 
 const parser = new Parser()
 
@@ -25,16 +24,16 @@ function test(name: string, input: string, output: Stmt[]) {
     t(name, () => expect(genAST(input)).toEqual(new Block(output)))
 }
 
-test("Basic", "1 + 1", [new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+")])
-
-test("String", '"Hello World"', [new StringLiteral("Hello World")])
-
-test("Multiline", "a = 1\nb=2", [
-    new AssignmentExpr(new Identifier("a"), new NumberLiteral("1")),
-    new AssignmentExpr(new Identifier("b"), new NumberLiteral("2")),
-])
-
 describe("Parse", () => {
+    test("Basic", "1 + 1", [new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+")])
+
+    test("String", '"Hello World"', [new StringLiteral("Hello World")])
+
+    test("Multiline", "a = 1\nb=2", [
+        new AssignmentExpr(new Identifier("a"), new NumberLiteral("1")),
+        new AssignmentExpr(new Identifier("b"), new NumberLiteral("2")),
+    ])
+
     describe("Error", () => {
         t("Basic", () => {
             expect(errFunc("+")).toThrow(new Error("SyntaxError: Unexpected Token `+` on line 1 and column 1"))
@@ -259,5 +258,16 @@ describe("Parse", () => {
 
     describe("Comment", () => {
         test("Basic", "//comment", [new Comment("comment")])
+        test("Multiline", "//comment\n//another", [new Comment("comment"), new Comment("another")])
+        test("Code", "1 + 1//comment", [
+            new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+"),
+            new Comment("comment"),
+        ])
+        test("Code Multiple", "1 + 1//comment\na + b//another", [
+            new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+"),
+            new Comment("comment"),
+            new BinaryExpr(new Identifier("a"), new Identifier("b"), "+"),
+            new Comment("another"),
+        ])
     })
 })
