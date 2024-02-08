@@ -43,6 +43,14 @@ test("Keyword", () => {
     ])
 })
 
+test("Number Method", () => {
+    expect(tokenize("1.hello")).toEqual([
+        new Token(TokenType.Number, 0, 0, "1"),
+        new Token(TokenType.Dot, 0, 1, "."),
+        new Token(TokenType.Symbol, 0, 2, "hello"),
+    ])
+})
+
 describe("Number", () => {
     test("Negative Number", () => {
         expect(tokenize("-1")).toEqual([new Token(TokenType.Minus, 0, 0, "-"), new Token(TokenType.Number, 0, 1, "1")])
