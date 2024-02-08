@@ -1,18 +1,18 @@
 import { test as t, expect, describe } from "bun:test"
 import Parser from "../src/front/parser"
-import { trans } from "../src/transpile/transpiler"
+import { idc, trans } from "../src/transpile/transpiler"
 
 const parser = new Parser()
 
 function test(name: string, input: string, output: string) {
     t(name, () => {
-        expect(trans(parser.genAST(input), -1)).toBe(output)
+        expect(trans(parser.genAST(input), -1)).toBe(output.replaceAll("\t", idc))
     })
 }
 
 function tdTest(name: string, input: string, output: string) {
     t.todo(name, () => {
-        expect(trans(parser.genAST(input), -1)).toBe(output)
+        expect(trans(parser.genAST(input), -1)).toBe(output.replaceAll("\t", idc))
     })
 }
 
@@ -60,15 +60,22 @@ describe("Dictionary", () => {
 })
 
 describe("Control Flow", () => {
-    tdTest("Basic", "if (a) {a}", "if a: a")
-    tdTest("Else", "if (a) {a} else {b}", "if a: a\nelse: b")
-    tdTest("Else If", "if (a) {a} else if (b) {b}", "if a: a\nelif b: b")
+    test("Basic", "if (a) {a}", "if a: a")
+    test("Else", "if (a) {a} else {b}", "if a: a\nelse: b")
+    test("Else If", "if (a) {a} else if (b) {b}", "if a: a\nelif b: b")
 
-    tdTest("Multiline", "if (a) {a b}", "if a:\n    a\n    b")
-    tdTest("Multiline Else", "if (a) {a b} else {a b}", "if a:\n    a\n    b\nelse:\n    a\n    b")
-    tdTest(
+    test("Shorthand", "if (a) a", "if a: a")
+    test("Shorthand Else", "if (a) a else b", "if a: a\nelse: b")
+    test("Shorthand Else If", "if (a) a else if (b) b else c", "if a: a\nelif b: b\nelse: c")
+
+    test("Multiline", "if (a) {a b}", "if a:\n\ta\n\tb")
+    test("Multiline Else", "if (a) {a b} else {a b}", "if a:\n\ta\n\tb\nelse:\n\ta\n\tb")
+    test(
         "Multiline Else If",
         "if (a) {a b} else if (b) {a b} else {a b}",
-        "if a:\n    a\n    b\nelif b:\n    a\n    b\nelse:\n    a\n    b"
+        "if a:\n\ta\n\tb\nelif b:\n\ta\n\tb\nelse:\n\ta\n\tb"
     )
+
+    test("Nested", "if (a) {a\nif (a){a b}}", "if a:\n\ta\n\tif a:\n\t\ta\n\t\tb")
+    test("Nested 2", "if (a) {a\nif (a){a if (a) {a b}}}", "if a:\n\ta\n\tif a:\n\t\ta\n\t\tif a:\n\t\t\ta\n\t\t\tb")
 })
