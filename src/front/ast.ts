@@ -119,7 +119,7 @@ export class AssignmentExpr implements Expr {
     }
 }
 
-export type BinaryType = "+" | "-" | "*" | "/" | "%"
+export type BinaryType = "+" | "-" | "*" | "/" | "%" | ">" | "<" | ">=" | "<=" | "&&" | "||" | "=="
 
 export class BinaryExpr implements Expr {
     type = NodeType.BinaryExpr

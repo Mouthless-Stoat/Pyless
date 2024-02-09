@@ -23,6 +23,12 @@ export enum TokenType {
     Walrus,
 
     Equality,
+    Greater,
+    Lesser,
+    GreaterEq,
+    LesserEq,
+    And,
+    Or,
 
     Function,
     If,
@@ -49,6 +55,12 @@ const symbolToken = {
     ":": TokenType.Colon,
     "==": TokenType.Equality,
     ":=": TokenType.Walrus,
+    ">": TokenType.Greater,
+    "<": TokenType.Lesser,
+    ">=": TokenType.GreaterEq,
+    "<=": TokenType.LesserEq,
+    "&&": TokenType.And,
+    "||": TokenType.Or,
 } as const
 
 const keywordToken = {

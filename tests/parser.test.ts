@@ -91,6 +91,8 @@ describe("Parse", () => {
                 "*"
             ),
         ])
+
+        test("Logical", "true && false", [new BinaryExpr(new Identifier("true"), new Identifier("false"), "&&")])
     })
 
     test("Parentheses", "(1 + 1) * 3", [
