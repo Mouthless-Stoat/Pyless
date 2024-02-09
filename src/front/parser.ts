@@ -15,23 +15,9 @@ import {
     IfStmt,
     CallExpr,
     Comment,
+    BinaryTokens,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
-
-const BinaryTokens = [
-    TokenType.Minus,
-    TokenType.Plus,
-    TokenType.Star,
-    TokenType.Slash,
-    TokenType.Percent,
-    TokenType.Equality,
-    TokenType.Greater,
-    TokenType.Lesser,
-    TokenType.GreaterEq,
-    TokenType.LesserEq,
-    TokenType.And,
-    TokenType.Or,
-] as const
 
 export default class Parser {
     tokens: Token[] = []
@@ -157,7 +143,7 @@ export default class Parser {
 
     private parseBinaryExpr(): Expr {
         let left = this.parseCallExpr()
-        while (this.current().isTypes(...BinaryTokens)) {
+        while (this.current().isTypes(...Object.values(BinaryTokens))) {
             const op = this.next().val as BinaryType
             const right = this.parseCallExpr()
             left = new BinaryExpr(left, right, op)

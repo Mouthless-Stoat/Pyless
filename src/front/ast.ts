@@ -1,3 +1,5 @@
+import { TokenType } from "./lexer"
+
 export enum NodeType {
     Block,
     Comment,
@@ -119,7 +121,22 @@ export class AssignmentExpr implements Expr {
     }
 }
 
-export type BinaryType = "+" | "-" | "*" | "/" | "%" | ">" | "<" | ">=" | "<=" | "&&" | "||" | "=="
+export const BinaryTokens = {
+    "-": TokenType.Minus,
+    "+": TokenType.Plus,
+    "*": TokenType.Star,
+    "/": TokenType.Slash,
+    "%": TokenType.Percent,
+    "==": TokenType.Equality,
+    ">": TokenType.Greater,
+    "<": TokenType.Lesser,
+    ">=": TokenType.GreaterEq,
+    "<=": TokenType.LesserEq,
+    "&&": TokenType.And,
+    "||": TokenType.Or,
+}
+
+export type BinaryType = keyof typeof BinaryTokens
 
 export class BinaryExpr implements Expr {
     type = NodeType.BinaryExpr
