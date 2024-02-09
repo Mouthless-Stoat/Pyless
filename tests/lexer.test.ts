@@ -18,6 +18,8 @@ describe("Lex", () => {
 
     test("Long Symbol", "veryLongSymbolForNoReason", [new Token(TokenType.Symbol, 0, 0, "veryLongSymbolForNoReason")])
 
+    test("Multi-symbol", ":=", [new Token(TokenType.Walrus, 0, 0, ":=")])
+
     test("List", "[1,2,3]", [
         new Token(TokenType.OpenBracket, 0, 0, "["),
         new Token(TokenType.Number, 0, 1, "1"),

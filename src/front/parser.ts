@@ -202,12 +202,9 @@ export default class Parser {
                 continue
             }
 
-            this.expect(TokenType.Colon, "SyntaxError: Expected `:`")
-            let isString = true
-            if (this.current().isTypes(TokenType.Equal)) {
-                this.next()
-                isString = false
-            }
+            if (!this.isTypes(TokenType.Walrus, TokenType.Colon))
+                this.error("SyntaxError: Expected `:` or `:=` ", this.current(), true)
+            let isString = this.next().isTypes(TokenType.Colon)
 
             const val = this.parseExpr()
 

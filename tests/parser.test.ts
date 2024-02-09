@@ -18,7 +18,8 @@ import {
 const parser = new Parser()
 
 const genAST = (input: string) => parser.genAST(input)
-const errFunc = (input: string) => () => genAST(input)
+const errTest = (name: string, input: string, err: string) =>
+    t(name, () => expect(() => genAST(input)).toThrow(new Error(err)))
 
 function test(name: string, input: string, output: Stmt[]) {
     t(name, () => expect(genAST(input)).toEqual(new Block(output)))
@@ -35,27 +36,15 @@ describe("Parse", () => {
     ])
 
     describe("Error", () => {
-        t("Basic", () => {
-            expect(errFunc("+")).toThrow(new Error("SyntaxError: Unexpected Token `+` on line 1 and column 1"))
-        })
+        errTest("Basic", "+", "SyntaxError: Unexpected Token `+` on line 1 and column 1")
 
-        t("End of File", () => {
-            expect(errFunc("1+")).toThrow(new Error("SyntaxError: Unexpected End of File"))
-        })
+        errTest("End of File", "1+", "SyntaxError: Unexpected End of File")
 
-        t("Object Comma", () => {
-            expect(errFunc("{a:1 b:10}")).toThrow(new Error("SyntaxError: Expected `,` on line 1 and column 6"))
-        })
+        errTest("Object Comma", "{a:1 b:10}", "SyntaxError: Expected `,` on line 1 and column 6")
 
-        t("Assignment Lefthand", () => {
-            expect(errFunc("1 = 1")).toThrow(
-                new Error("SyntaxError: Invalid Left hand of Assignment on line 1 and column 1")
-            )
-        })
+        errTest("Assignment Lefthand", "1 = 1", "SyntaxError: Invalid Left hand of Assignment on line 1 and column 1")
 
-        t("Coment", () => {
-            expect(errFunc("1 + // hello")).toThrow(new Error("SyntaxError: Unexpected Comment on line 1 and column 5"))
-        })
+        errTest("Coment", "1 + // hello", "SyntaxError: Unexpected Comment on line 1 and column 5")
     })
 
     describe("Chaining", () => {

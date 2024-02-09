@@ -22,6 +22,8 @@ export enum TokenType {
     Colon,
     Walrus,
 
+    Equality,
+
     Function,
     If,
     Else,
@@ -45,6 +47,8 @@ const symbolToken = {
     "%": TokenType.Percent,
     "=": TokenType.Equal,
     ":": TokenType.Colon,
+    "==": TokenType.Equality,
+    ":=": TokenType.Walrus,
 } as const
 
 const keywordToken = {
@@ -85,7 +89,20 @@ export function tokenize(input = "", addEOF = true): Token[] {
     // else it's a symbol (sym)
     for (const [row, line] of srcLines.entries()) {
         for (const { groups: token, index: col } of line.matchAll(
-            /(?:\/\/(?<comment>.*))|(?<string>"(?:\\.|[^"\\])*")|(?<mul>[a-zA-Z]+)|(?<num>\d+(?:\.\d+)?(?:e-?\d+)?)|(?<sym>[^\s\n\t\r])/g
+            new RegExp(
+                `(?://(?<comment>.*))|(?<string>"[^"]*")|(?<mul>[a-zA-Z]+)|(?<num>\\d+(?:\\.\\d+)?(?:e-?\\d+)?)|(?<sym>(?:${Object.keys(
+                    symbolToken
+                )
+                    .sort((a, b) => b.length - a.length)
+                    .map((v) =>
+                        v
+                            .split("")
+                            .map((s) => "\\" + s)
+                            .join("")
+                    )
+                    .join("|")}))`,
+                "g"
+            )
         )) {
             if (!token) throw `What is this token type`
 
