@@ -1,4 +1,6 @@
 export enum TokenType {
+    NEVER,
+
     Number,
     String,
     Comment,
@@ -21,6 +23,7 @@ export enum TokenType {
     Equal,
     Colon,
     Walrus,
+    Exclamation,
 
     Equality,
     Greater,
@@ -61,6 +64,7 @@ const symbolToken = {
     "<=": TokenType.LesserEq,
     "&&": TokenType.And,
     "||": TokenType.Or,
+    "!": TokenType.Exclamation,
 } as const
 
 const keywordToken = {

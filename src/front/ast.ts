@@ -1,3 +1,4 @@
+import { isModifierLike } from "typescript"
 import { TokenType } from "./lexer"
 
 export enum NodeType {
@@ -11,6 +12,7 @@ export enum NodeType {
     // expr
     Identifier,
     BinaryExpr,
+    UnaryExpr,
     CallExpr,
 
     // literal
@@ -122,21 +124,21 @@ export class AssignmentExpr implements Expr {
 }
 
 export const BinaryTokens = {
-    "-": TokenType.Minus,
-    "+": TokenType.Plus,
-    "*": TokenType.Star,
-    "/": TokenType.Slash,
-    "%": TokenType.Percent,
-    "==": TokenType.Equality,
-    ">": TokenType.Greater,
-    "<": TokenType.Lesser,
-    ">=": TokenType.GreaterEq,
-    "<=": TokenType.LesserEq,
-    "&&": TokenType.And,
-    "||": TokenType.Or,
-}
+    [TokenType.Minus]: "-",
+    [TokenType.Plus]: "+",
+    [TokenType.Star]: "*",
+    [TokenType.Slash]: "/",
+    [TokenType.Percent]: "%",
+    [TokenType.Equality]: "==",
+    [TokenType.Greater]: ">",
+    [TokenType.Lesser]: "<",
+    [TokenType.GreaterEq]: ">=",
+    [TokenType.LesserEq]: "<=",
+    [TokenType.And]: "&&",
+    [TokenType.Or]: "||",
+} as const
 
-export type BinaryType = keyof typeof BinaryTokens
+export type BinaryType = (typeof BinaryTokens)[keyof typeof BinaryTokens]
 
 export class BinaryExpr implements Expr {
     type = NodeType.BinaryExpr
@@ -150,6 +152,41 @@ export class BinaryExpr implements Expr {
         this.right = right
         this.operator = op
         this.paren = paren ?? false
+    }
+}
+
+export const PreUnaryTokens = {
+    [TokenType.Exclamation]: "!",
+    [TokenType.Minus]: "-",
+} as const
+
+export type PreUnaryType = (typeof PreUnaryTokens)[keyof typeof PreUnaryTokens]
+
+export class PreUnaryExpr implements Expr {
+    type = NodeType.UnaryExpr
+    expr: Expr
+    operator: PreUnaryType
+
+    constructor(expr: Expr, op: PreUnaryType) {
+        this.expr = expr
+        this.operator = op
+    }
+}
+
+export const PostUnaryTokens = {
+    [TokenType.NEVER]: "_",
+} as const
+
+export type PostUnaryType = (typeof PostUnaryTokens)[keyof typeof PostUnaryTokens]
+
+export class PostUnaryExpr implements Expr {
+    type = NodeType.UnaryExpr
+    expr: Expr
+    operator: PostUnaryType
+
+    constructor(expr: Expr, op: PostUnaryType) {
+        this.expr = expr
+        this.operator = op
     }
 }
 

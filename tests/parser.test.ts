@@ -13,6 +13,7 @@ import {
     type Stmt,
     CallExpr,
     Comment,
+    PreUnaryExpr,
 } from "../src/front/ast"
 
 const parser = new Parser()
@@ -259,6 +260,16 @@ describe("Parse", () => {
             new Comment("comment"),
             new BinaryExpr(new Identifier("a"), new Identifier("b"), "+"),
             new Comment("another"),
+        ])
+    })
+
+    describe("Prefix Unary", () => {
+        test("Basic", "-1", [new PreUnaryExpr(new NumberLiteral("1"), "-")])
+        test("with Binary", "1--1", [
+            new BinaryExpr(new NumberLiteral("1"), new PreUnaryExpr(new NumberLiteral("1"), "-"), "-"),
+        ])
+        test("with Call", '-print("hello")', [
+            new PreUnaryExpr(new CallExpr(new Identifier("print"), [new StringLiteral("hello")]), "-"),
         ])
     })
 })

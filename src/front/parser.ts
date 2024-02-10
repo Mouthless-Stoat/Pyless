@@ -16,6 +16,12 @@ import {
     CallExpr,
     Comment,
     BinaryTokens,
+    PreUnaryTokens,
+    PostUnaryTokens,
+    type PostUnaryType,
+    PostUnaryExpr,
+    type PreUnaryType,
+    PreUnaryExpr,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -122,8 +128,10 @@ export default class Parser {
     // Expression order
     // 1. Primary
     // 2. Call
-    // 3. Binary
-    // 4. Assignment
+    // 3. Prefix Unary
+    // 4. Postfix Unary
+    // 5. Binary
+    // 6. Assignment
 
     private parseExpr(): Expr {
         return this.parseAssignmentExpr()
@@ -142,13 +150,31 @@ export default class Parser {
     }
 
     private parseBinaryExpr(): Expr {
-        let left = this.parseCallExpr()
-        while (this.current().isTypes(...Object.values(BinaryTokens))) {
+        let left = this.parsePreUnary()
+        while (this.isTypes(...Object.keys(BinaryTokens).map((t) => parseInt(t) as TokenType))) {
             const op = this.next().val as BinaryType
-            const right = this.parseCallExpr()
+            const right = this.parsePreUnary()
             left = new BinaryExpr(left, right, op)
         }
         return left
+    }
+
+    private parsePreUnary(): Expr {
+        if (!this.isTypes(...Object.keys(PreUnaryTokens).map((t) => parseInt(t) as TokenType))) {
+            return this.parsePostUnary()
+        }
+        const op = this.next().val as PreUnaryType
+        const expr = this.parsePreUnary()
+        return new PreUnaryExpr(expr, op)
+    }
+
+    private parsePostUnary(): Expr {
+        let expr = this.parseCallExpr()
+        while (this.isTypes(...Object.keys(PostUnaryTokens).map((t) => parseInt(t) as TokenType))) {
+            const op = this.next().val as PostUnaryType
+            expr = new PostUnaryExpr(expr, op)
+        }
+        return expr
     }
 
     private parseCallExpr(): Expr {

@@ -90,4 +90,10 @@ describe("Trans", () => {
         test("Multiline", "1 + 1 //hello world\n1 + 1 //another", "1 + 1 # hello world\n1 + 1 # another")
         test("Code", "1 + 1 //hello world", "1 + 1 # hello world")
     })
+
+    describe("Prefix Unary", () => {
+        test("Basic", "-1", "-1")
+        test("with Binary", "1--1", "1 - -1")
+        test("with Call", "-a", "-a")
+    })
 })
