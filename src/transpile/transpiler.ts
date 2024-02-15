@@ -15,6 +15,7 @@ import {
     CallExpr,
     Comment,
     PreUnaryExpr,
+    ListLiteral,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -45,6 +46,8 @@ export function trans(node: Stmt, indent: number, top: boolean = false): string 
             return `# ${(node as Comment).content.trim()}`
         case NodeType.UnaryExpr:
             return transPreUnaryExpr(node as PreUnaryExpr, indent)
+        case NodeType.ListLiteral:
+            return transList(node as ListLiteral, indent)
         default:
             throw `This AST node have not been implemented ${NodeType[node.type]}`
     }
@@ -135,4 +138,7 @@ function transCallExpr(call: CallExpr, indent: number): string {
 
 function transPreUnaryExpr(prenary: PreUnaryExpr, indent: number): string {
     return `${prenary.operator}${trans(prenary.expr, indent)}`
+}
+function transList(list: ListLiteral, indent: number): string {
+    return `[${list.element.map((e) => trans(e, indent)).join(", ")}]`
 }

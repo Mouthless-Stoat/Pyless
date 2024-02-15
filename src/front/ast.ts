@@ -1,4 +1,4 @@
-import { isModifierLike } from "typescript"
+import { isModifierLike, type ExponentiationOperator } from "typescript"
 import { TokenType } from "./lexer"
 
 export enum NodeType {
@@ -19,6 +19,7 @@ export enum NodeType {
     NumberLiteral,
     StringLiteral,
     DictionaryLiteral,
+    ListLiteral,
 }
 
 export function isNodeType(node: Stmt, ...types: NodeType[]) {
@@ -99,6 +100,15 @@ export class DictionaryLiteral implements Expr {
 
     constructor(prop: Propety[]) {
         this.propeties = prop
+    }
+}
+
+export class ListLiteral implements Expr {
+    type = NodeType.ListLiteral
+    element: Expr[]
+
+    constructor(elem: Expr[]) {
+        this.element = elem
     }
 }
 

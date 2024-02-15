@@ -96,4 +96,10 @@ describe("Trans", () => {
         test("with Binary", "1--1", "1 - -1")
         test("with Call", "-a", "-a")
     })
+
+    describe("List", () => {
+        test("Basic", "[1,2,3]", "[1, 2, 3]")
+        test("Expression", "[1, 1+1, a=1]", "[1, 1 + 1, (a := 1)]")
+        test("Nested", "[1,2, [1,2,3]]", "[1, 2, [1, 2, 3]]")
+    })
 })

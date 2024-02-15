@@ -95,6 +95,18 @@ export class Token {
     }
 }
 
+const regex = `(?://(?<comment>.*))|(?<string>"[^"]*")|(?<mul>[a-zA-Z]+)|(?<num>\\d+(?:\\.\\d+)?(?:e-?\\d+)?)|(?<sym>(?:${Object.keys(
+    symbolToken
+)
+    .sort((a, b) => b.length - a.length)
+    .map((v) =>
+        v
+            .split("")
+            .map((s) => "\\" + s)
+            .join("")
+    )
+    .join("|")}))`
+
 export function tokenize(input = "", addEOF = true): Token[] {
     const srcLines = input.replace("\r\n", "\n").split("\n") // window shit
     const tokens: Token[] = []
@@ -103,23 +115,9 @@ export function tokenize(input = "", addEOF = true): Token[] {
     // if it only letter then it's a multi symbol (mul)
     // if it onlt number then it's a number (num)
     // else it's a symbol (sym)
+
     for (const [row, line] of srcLines.entries()) {
-        for (const { groups: token, index: col } of line.matchAll(
-            new RegExp(
-                `(?://(?<comment>.*))|(?<string>"[^"]*")|(?<mul>[a-zA-Z]+)|(?<num>\\d+(?:\\.\\d+)?(?:e-?\\d+)?)|(?<sym>(?:${Object.keys(
-                    symbolToken
-                )
-                    .sort((a, b) => b.length - a.length)
-                    .map((v) =>
-                        v
-                            .split("")
-                            .map((s) => "\\" + s)
-                            .join("")
-                    )
-                    .join("|")}))`,
-                "g"
-            )
-        )) {
+        for (const { groups: token, index: col } of line.matchAll(new RegExp(regex, "g"))) {
             if (!token) throw `What is this token type`
 
             if (token.mul) {

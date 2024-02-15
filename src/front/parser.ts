@@ -1,3 +1,4 @@
+import { TokenClass, TokenFlags } from "typescript"
 import {
     Block,
     type Expr,
@@ -22,6 +23,7 @@ import {
     PostUnaryExpr,
     type PreUnaryType,
     PreUnaryExpr,
+    ListLiteral,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -205,9 +207,22 @@ export default class Parser {
                 return this.parseDict()
             case TokenType.Comment:
                 this.error("SyntaxError: Unexpected Comment", this.next())
+            case TokenType.OpenBracket:
+                return this.parseList()
             default:
                 return this.error("", this.next(), true)
         }
+    }
+    parseList(): Expr {
+        this.expect(TokenType.OpenBracket, "PylessBug: Expected `[`")
+        const elem: Expr[] = []
+        while (this.notEOF() && !this.isTypes(TokenType.CloseBracket)) {
+            elem.push(this.parseExpr())
+            if (this.isTypes(TokenType.CloseBracket)) continue
+            this.expect(TokenType.Comma, "SyntaxError: Expetced `,`")
+        }
+        this.expect(TokenType.CloseBracket, "SynatxError: Expected `]`")
+        return new ListLiteral(elem)
     }
 
     private parseDict(): Expr {

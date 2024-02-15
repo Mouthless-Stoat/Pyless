@@ -14,6 +14,7 @@ import {
     CallExpr,
     Comment,
     PreUnaryExpr,
+    ListLiteral,
 } from "../src/front/ast"
 
 const parser = new Parser()
@@ -270,6 +271,28 @@ describe("Parse", () => {
         ])
         test("with Call", '-print("hello")', [
             new PreUnaryExpr(new CallExpr(new Identifier("print"), [new StringLiteral("hello")]), "-"),
+        ])
+    })
+
+    describe("List", () => {
+        test("Basic", "[1,2,3]", [
+            new ListLiteral([new NumberLiteral("1"), new NumberLiteral("2"), new NumberLiteral("3")]),
+        ])
+
+        test("Expression", "[1+1,2-1,a=1]", [
+            new ListLiteral([
+                new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+"),
+                new BinaryExpr(new NumberLiteral("2"), new NumberLiteral("1"), "-"),
+                new AssignmentExpr(new Identifier("a"), new NumberLiteral("1")),
+            ]),
+        ])
+
+        test("Nested", "[1, 2,[1,2,3]]", [
+            new ListLiteral([
+                new NumberLiteral("1"),
+                new NumberLiteral("2"),
+                new ListLiteral([new NumberLiteral("1"), new NumberLiteral("2"), new NumberLiteral("3")]),
+            ]),
         ])
     })
 })
