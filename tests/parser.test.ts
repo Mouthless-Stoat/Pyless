@@ -15,6 +15,7 @@ import {
     Comment,
     PreUnaryExpr,
     ListLiteral,
+    IndexExpr,
 } from "../src/front/ast"
 
 const parser = new Parser()
@@ -293,6 +294,28 @@ describe("Parse", () => {
                 new NumberLiteral("2"),
                 new ListLiteral([new NumberLiteral("1"), new NumberLiteral("2"), new NumberLiteral("3")]),
             ]),
+        ])
+    })
+
+    describe("Index", () => {
+        test("Basic", "a[0]", [new IndexExpr(new Identifier("a"), new NumberLiteral("0"))])
+
+        test("Expression", "a[1 + 1]", [
+            new IndexExpr(new Identifier("a"), new BinaryExpr(new NumberLiteral("1"), new NumberLiteral("1"), "+")),
+        ])
+
+        test("Chain", "a[0][1][2][3]", [
+            new IndexExpr(
+                new IndexExpr(
+                    new IndexExpr(new IndexExpr(new Identifier("a"), new NumberLiteral("0")), new NumberLiteral("1")),
+                    new NumberLiteral("2")
+                ),
+                new NumberLiteral("3")
+            ),
+        ])
+
+        test("Nest", "a[a[0]]", [
+            new IndexExpr(new Identifier("a"), new IndexExpr(new Identifier("a"), new NumberLiteral("0"))),
         ])
     })
 })

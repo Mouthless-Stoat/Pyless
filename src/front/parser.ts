@@ -24,6 +24,7 @@ import {
     type PreUnaryType,
     PreUnaryExpr,
     ListLiteral,
+    IndexExpr,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -129,11 +130,12 @@ export default class Parser {
 
     // Expression order
     // 1. Primary
-    // 2. Call
-    // 3. Prefix Unary
-    // 4. Postfix Unary
-    // 5. Binary
-    // 6. Assignment
+    // 2. Index
+    // 3. Call
+    // 4. Prefix Unary
+    // 5. Postfix Unary
+    // 6. Binary
+    // 7. Assignment
 
     private parseExpr(): Expr {
         return this.parseAssignmentExpr()
@@ -180,12 +182,23 @@ export default class Parser {
     }
 
     private parseCallExpr(): Expr {
-        let caller = this.parsePrimary()
+        let caller = this.parseIndexExpr()
         while (this.isTypes(TokenType.OpenParen)) {
             const args = this.parseArgs()
             caller = new CallExpr(caller, args)
         }
         return caller
+    }
+
+    private parseIndexExpr(): Expr {
+        let indexable = this.parsePrimary()
+        while (this.isTypes(TokenType.OpenBracket)) {
+            this.next()
+            const index = this.parseExpr()
+            indexable = new IndexExpr(indexable, index)
+            this.expect(TokenType.CloseBracket, "SyntaxError: Expected `[`")
+        }
+        return indexable
     }
 
     private parsePrimary(): Expr {

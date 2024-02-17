@@ -1,4 +1,4 @@
-import type { SignatureHelpTriggerReason } from "typescript"
+import { reduceEachLeadingCommentRange, type SignatureHelpTriggerReason } from "typescript"
 import {
     NodeType,
     type Block,
@@ -16,6 +16,7 @@ import {
     Comment,
     PreUnaryExpr,
     ListLiteral,
+    IndexExpr,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -48,6 +49,8 @@ export function trans(node: Stmt, indent: number, top: boolean = false): string 
             return transPreUnaryExpr(node as PreUnaryExpr, indent)
         case NodeType.ListLiteral:
             return transList(node as ListLiteral, indent)
+        case NodeType.IndexExpr:
+            return transIndexExpr(node as IndexExpr, indent)
         default:
             throw `This AST node have not been implemented ${NodeType[node.type]}`
     }
@@ -141,4 +144,7 @@ function transPreUnaryExpr(prenary: PreUnaryExpr, indent: number): string {
 }
 function transList(list: ListLiteral, indent: number): string {
     return `[${list.element.map((e) => trans(e, indent)).join(", ")}]`
+}
+function transIndexExpr(index: IndexExpr, indent: number): string {
+    return `${trans(index.indexable, indent)}[${trans(index.index, indent)}]`
 }

@@ -102,4 +102,11 @@ describe("Trans", () => {
         test("Expression", "[1, 1+1, a=1]", "[1, 1 + 1, (a := 1)]")
         test("Nested", "[1,2, [1,2,3]]", "[1, 2, [1, 2, 3]]")
     })
+
+    describe("Index", () => {
+        test("Basic", "a[1]", "a[1]")
+        test("Chain", "a[0][1]", "a[0][1]")
+        test("Expression", "a[1 + 1]", "a[1 + 1]")
+        test("Nested", "a[a[0]]", "a[a[0]]")
+    })
 })

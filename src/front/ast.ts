@@ -14,6 +14,7 @@ export enum NodeType {
     BinaryExpr,
     UnaryExpr,
     CallExpr,
+    IndexExpr,
 
     // literal
     NumberLiteral,
@@ -208,5 +209,16 @@ export class CallExpr implements Expr {
     constructor(caller: Expr, args: Expr[]) {
         this.caller = caller
         this.args = args
+    }
+}
+
+export class IndexExpr implements Expr {
+    type = NodeType.IndexExpr
+    indexable: Expr
+    index: Expr
+
+    constructor(indexable: Expr, index: Expr) {
+        this.indexable = indexable
+        this.index = index
     }
 }

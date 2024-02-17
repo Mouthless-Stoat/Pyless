@@ -33,6 +33,8 @@ export enum TokenType {
     And,
     Or,
 
+    DoubleColon,
+
     Function,
     If,
     Else,
@@ -65,6 +67,7 @@ const symbolToken = {
     "&&": TokenType.And,
     "||": TokenType.Or,
     "!": TokenType.Exclamation,
+    "::": TokenType.DoubleColon,
 } as const
 
 const keywordToken = {
