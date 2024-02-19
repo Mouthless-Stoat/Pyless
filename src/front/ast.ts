@@ -15,6 +15,7 @@ export enum NodeType {
     UnaryExpr,
     CallExpr,
     IndexExpr,
+    MethodExpr,
 
     // literal
     NumberLiteral,
@@ -220,5 +221,16 @@ export class IndexExpr implements Expr {
     constructor(indexable: Expr, index: Expr) {
         this.indexable = indexable
         this.index = index
+    }
+}
+
+export class MethodExpr implements Expr {
+    type = NodeType.MethodExpr
+    value: Expr
+    method: Expr
+
+    constructor(val: Expr, method: Expr) {
+        this.value = val
+        this.method = method
     }
 }

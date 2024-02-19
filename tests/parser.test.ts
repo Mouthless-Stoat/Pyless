@@ -16,6 +16,7 @@ import {
     PreUnaryExpr,
     ListLiteral,
     IndexExpr,
+    MethodExpr,
 } from "../src/front/ast"
 
 const parser = new Parser()
@@ -47,7 +48,9 @@ describe("Parse", () => {
 
         errTest("Assignment Lefthand", "1 = 1", "SyntaxError: Invalid Left hand of Assignment on line 1 and column 1")
 
-        errTest("Coment", "1 + // hello", "SyntaxError: Unexpected Comment on line 1 and column 5")
+        errTest("Comment", "1 + // hello", "SyntaxError: Unexpected Comment on line 1 and column 5")
+
+        errTest("Method", "a.1", "SyntaxError: Expected Identifier on line 1 and column 3")
     })
 
     describe("Chaining", () => {
@@ -316,6 +319,23 @@ describe("Parse", () => {
 
         test("Nest", "a[a[0]]", [
             new IndexExpr(new Identifier("a"), new IndexExpr(new Identifier("a"), new NumberLiteral("0"))),
+        ])
+    })
+
+    describe("Method", () => {
+        test("Basic", "a.a", [new MethodExpr(new Identifier("a"), new Identifier("a"))])
+
+        test("Call", "a.a()", [new CallExpr(new MethodExpr(new Identifier("a"), new Identifier("a")), [])])
+
+        test("Chain", "a.a.a", [
+            new MethodExpr(new MethodExpr(new Identifier("a"), new Identifier("a")), new Identifier("a")),
+        ])
+
+        test("Chain", "a.a.a()", [
+            new CallExpr(
+                new MethodExpr(new MethodExpr(new Identifier("a"), new Identifier("a")), new Identifier("a")),
+                []
+            ),
         ])
     })
 })

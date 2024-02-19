@@ -25,6 +25,7 @@ import {
     PreUnaryExpr,
     ListLiteral,
     IndexExpr,
+    MethodExpr,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -131,11 +132,12 @@ export default class Parser {
     // Expression order
     // 1. Primary
     // 2. Index
-    // 3. Call
-    // 4. Prefix Unary
-    // 5. Postfix Unary
-    // 6. Binary
-    // 7. Assignment
+    // 3. Method
+    // 4. Call
+    // 5. Prefix Unary
+    // 6. Postfix Unary
+    // 7. Binary
+    // 8. Assignment
 
     private parseExpr(): Expr {
         return this.parseAssignmentExpr()
@@ -182,12 +184,24 @@ export default class Parser {
     }
 
     private parseCallExpr(): Expr {
-        let caller = this.parseIndexExpr()
+        let caller = this.parseMethod()
         while (this.isTypes(TokenType.OpenParen)) {
             const args = this.parseArgs()
             caller = new CallExpr(caller, args)
         }
         return caller
+    }
+
+    private parseMethod(): Expr {
+        let val = this.parseIndexExpr()
+        while (this.isTypes(TokenType.Dot)) {
+            this.expect(TokenType.Dot, "PylessBug: Expected `.`")
+            if (!this.isTypes(TokenType.Symbol)) {
+                this.error("SyntaxError: Expected Identifier", this.next())
+            }
+            val = new MethodExpr(val, this.parsePrimary())
+        }
+        return val
     }
 
     private parseIndexExpr(): Expr {

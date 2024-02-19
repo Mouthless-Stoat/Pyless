@@ -109,4 +109,12 @@ describe("Trans", () => {
         test("Expression", "a[1 + 1]", "a[1 + 1]")
         test("Nested", "a[a[0]]", "a[a[0]]")
     })
+
+    describe("Method", () => {
+        test("Basic", "a.a", "(a).a")
+        test("Number", "1.a", "(1).a")
+        test("Chain", "a.a.a", "((a).a).a")
+        test("Call", "a.a()", "(a).a()")
+        test("Chain Call", "a.a.a()", "((a).a).a()")
+    })
 })

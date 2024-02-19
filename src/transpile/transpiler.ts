@@ -16,6 +16,7 @@ import {
     PreUnaryExpr,
     ListLiteral,
     IndexExpr,
+    MethodExpr,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -50,6 +51,8 @@ export function trans(node: Stmt, indent: number, top: boolean = false): string 
             return transList(node as ListLiteral, indent)
         case NodeType.IndexExpr:
             return transIndexExpr(node as IndexExpr, indent)
+        case NodeType.MethodExpr:
+            return transMethod(node as MethodExpr, indent)
         default:
             throw `This AST node have not been implemented ${NodeType[node.type]}`
     }
@@ -146,4 +149,7 @@ function transList(list: ListLiteral, indent: number): string {
 }
 function transIndexExpr(index: IndexExpr, indent: number): string {
     return `${trans(index.indexable, indent)}[${trans(index.index, indent)}]`
+}
+function transMethod(method: MethodExpr, indent: number): string {
+    return `(${trans(method.value, indent)}).${trans(method.method, indent)}`
 }
