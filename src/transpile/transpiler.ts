@@ -1,4 +1,3 @@
-import { reduceEachLeadingCommentRange, type SignatureHelpTriggerReason } from "typescript"
 import {
     NodeType,
     type Block,
