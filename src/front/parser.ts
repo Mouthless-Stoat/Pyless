@@ -26,6 +26,7 @@ import {
     ListLiteral,
     IndexExpr,
     MethodExpr,
+    BooleanExpr,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -147,7 +148,7 @@ export default class Parser {
         const symTk = this.current()
         let sym = this.parseBinaryExpr()
         if (this.isTypes(TokenType.Equal)) {
-            if (!isNodeType(sym, NodeType.Identifier)) this.error("SyntaxError: Invalid Left hand of Assignment", symTk)
+            if (!isNodeType(sym, NodeType.Identifier)) this.error("SyntaxError: Invalid left hand of assignment", symTk)
             this.next()
             const val = this.parseExpr()
             return new AssignmentExpr(sym, val)
@@ -210,7 +211,7 @@ export default class Parser {
             this.next()
             const index = this.parseExpr()
             indexable = new IndexExpr(indexable, index)
-            this.expect(TokenType.CloseBracket, "SyntaxError: Expected `[`")
+            this.expect(TokenType.CloseBracket, "SyntaxError: Expected `]`")
         }
         return indexable
     }
@@ -236,6 +237,8 @@ export default class Parser {
                 this.error("SyntaxError: Unexpected Comment", this.next())
             case TokenType.OpenBracket:
                 return this.parseList()
+            case TokenType.Boolean:
+                return new BooleanExpr(this.next().val)
             default:
                 return this.error("", this.next(), true)
         }

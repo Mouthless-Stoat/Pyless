@@ -1,3 +1,4 @@
+import type { BinaryType } from "bun"
 import {
     NodeType,
     type Block,
@@ -17,6 +18,8 @@ import {
     ListLiteral,
     IndexExpr,
     MethodExpr,
+    BooleanExpr,
+    pythonBinary,
 } from "../front/ast"
 
 // trans could stand for transpile or it could just be trans :3
@@ -53,6 +56,8 @@ export function trans(node: Stmt, indent: number, top: boolean = false): string 
             return transIndexExpr(node as IndexExpr, indent)
         case NodeType.MethodExpr:
             return transMethod(node as MethodExpr, indent)
+        case NodeType.BooleanLiternal:
+            return (node as BooleanExpr).value === "T" ? "True" : "False"
         default:
             throw `This AST node have not been implemented ${NodeType[node.type]}`
     }
@@ -105,7 +110,9 @@ function transDict(dict: DictionaryLiteral, ident: number): string {
 }
 
 function transBinaryExpr(binary: BinaryExpr, indent: number): string {
-    return `${trans(binary.left, indent)} ${binary.operator} ${trans(binary.right, indent)}`
+    return `${trans(binary.left, indent)} ${
+        pythonBinary[binary.operator as keyof typeof pythonBinary] ?? binary.operator
+    } ${trans(binary.right, indent)}`
 }
 
 function transIfStmt(stmt: IfStmt, indent: number): string {

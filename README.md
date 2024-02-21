@@ -9,7 +9,6 @@ Simple language that transpile to python, nothing more to say. Created this beca
 [X] Method call
 [ ] While loop
 [ ] For loop
-[ ] Remove comma from arg and list
 [ ] break, continue, etc. statement so syntax error
 [ ] Boolean
 [ ] Logical operator transpile

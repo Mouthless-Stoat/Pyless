@@ -22,6 +22,7 @@ export enum NodeType {
     StringLiteral,
     DictionaryLiteral,
     ListLiteral,
+    BooleanLiternal,
 }
 
 export function isNodeType(node: Stmt, ...types: NodeType[]) {
@@ -152,6 +153,11 @@ export const BinaryTokens = {
 
 export type BinaryType = (typeof BinaryTokens)[keyof typeof BinaryTokens]
 
+export const pythonBinary = {
+    "&&": "and",
+    "||": "or",
+} as const
+
 export class BinaryExpr implements Expr {
     type = NodeType.BinaryExpr
     left: Expr
@@ -232,5 +238,14 @@ export class MethodExpr implements Expr {
     constructor(val: Expr, method: Expr) {
         this.value = val
         this.method = method
+    }
+}
+
+export class BooleanExpr implements Expr {
+    type = NodeType.BooleanLiternal
+    value: string
+
+    constructor(val: string) {
+        this.value = val
     }
 }

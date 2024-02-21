@@ -17,6 +17,7 @@ import {
     ListLiteral,
     IndexExpr,
     MethodExpr,
+    BooleanExpr,
 } from "../src/front/ast"
 
 const parser = new Parser()
@@ -46,11 +47,13 @@ describe("Parse", () => {
 
         errTest("Object Comma", "{a:1 b:10}", "SyntaxError: Expected `,` on line 1 and column 6")
 
-        errTest("Assignment Lefthand", "1 = 1", "SyntaxError: Invalid Left hand of Assignment on line 1 and column 1")
+        errTest("Assignment Lefthand", "1 = 1", "SyntaxError: Invalid left hand of assignment on line 1 and column 1")
 
         errTest("Comment", "1 + // hello", "SyntaxError: Unexpected Comment on line 1 and column 5")
 
         errTest("Method", "a.1", "SyntaxError: Expected Identifier on line 1 and column 3")
+
+        errTest("Boolean Assignment", "T= 1", "SyntaxError: Invalid left hand of assignment on line 1 and column 1")
     })
 
     describe("Chaining", () => {
@@ -98,7 +101,7 @@ describe("Parse", () => {
             ),
         ])
 
-        test("Logical", "true && false", [new BinaryExpr(new Identifier("true"), new Identifier("false"), "&&")])
+        test("Logical", "T && F", [new BinaryExpr(new BooleanExpr("T"), new BooleanExpr("F"), "&&")])
     })
 
     test("Parentheses", "(1 + 1) * 3", [

@@ -12,6 +12,7 @@ function test(name: string, input: string, output: string) {
 
 describe("Trans", () => {
     test("Basic", "1 + 1", "1 + 1")
+    test("Boolean", "a = T", "a = True")
     test("Multiline", "1 2 a = 3 4 + 5", "1\n2\na = 3\n4 + 5")
 
     describe("Binary Operation", () => {
@@ -20,6 +21,8 @@ describe("Trans", () => {
         test("Parentheses", "(1 + 2) + 3", "(1 + 2) + 3")
         test("Parentheses 2", "(1 + 2) / 3", "(1 + 2) / 3")
         test("Parentheses 3", "1 *((2 +3)/ 4)", "1 * ((2 + 3) / 4)")
+
+        test("Logical", "T && F", "True and False")
     })
 
     describe("Assignment", () => {

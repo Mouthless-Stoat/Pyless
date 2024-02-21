@@ -5,6 +5,7 @@ export enum TokenType {
     String,
     Comment,
     Symbol,
+    Boolean,
 
     OpenParen,
     CloseParen,
@@ -74,6 +75,10 @@ const keywordToken = {
     fn: TokenType.Function,
     if: TokenType.If,
     else: TokenType.Else,
+    true: TokenType.Boolean,
+    false: TokenType.Boolean,
+    T: TokenType.Boolean,
+    F: TokenType.Boolean,
 } as const
 
 export class Token {
@@ -111,10 +116,10 @@ const regex = `(?://(?<comment>.*))|(?<string>"[^"]*")|(?<mul>[a-zA-Z]+)|(?<num>
     .join("|")}))`
 
 export function tokenize(input = "", addEOF = true): Token[] {
-    const srcLines = input.replace("\r\n", "\n").split("\n") // window shit
+    const srcLines = input.replace("\r\n", "\n").split("\n") // window newline
     const tokens: Token[] = []
 
-    // behold regex hell
+    // behold regex
     // if it only letter then it's a multi symbol (mul)
     // if it onlt number then it's a number (num)
     // else it's a symbol (sym)
