@@ -1,4 +1,3 @@
-import { isModifierLike, type ExponentiationOperator } from "typescript"
 import { TokenType } from "./lexer"
 
 export enum NodeType {
@@ -241,11 +240,13 @@ export class MethodExpr implements Expr {
     }
 }
 
+export type BooleanType = "T" | "F"
+
 export class BooleanExpr implements Expr {
     type = NodeType.BooleanLiternal
-    value: string
+    value: BooleanType
 
-    constructor(val: string) {
+    constructor(val: BooleanType) {
         this.value = val
     }
 }

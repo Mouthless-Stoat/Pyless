@@ -1,4 +1,3 @@
-import { TokenClass, TokenFlags } from "typescript"
 import {
     Block,
     type Expr,
@@ -27,6 +26,7 @@ import {
     IndexExpr,
     MethodExpr,
     BooleanExpr,
+    type BooleanType,
 } from "./ast"
 import { TokenType, Token, tokenize } from "./lexer"
 
@@ -238,7 +238,7 @@ export default class Parser {
             case TokenType.OpenBracket:
                 return this.parseList()
             case TokenType.Boolean:
-                return new BooleanExpr(this.next().val)
+                return new BooleanExpr(this.next().val as BooleanType)
             default:
                 return this.error("", this.next(), true)
         }

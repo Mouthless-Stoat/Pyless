@@ -1,4 +1,3 @@
-import type { BinaryType } from "bun"
 import {
     NodeType,
     type Block,
